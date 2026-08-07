@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #d9e6ff;
+  --color-brand-200: #bcd3ff;
+  --color-brand-300: #8eb6ff;
+  --color-brand-400: #5990ff;
+  --color-brand-500: #2f6bff;
+  --color-brand-600: #1f4fe8;
+  --color-brand-700: #1b3fc4;
+  --color-brand-800: #1d379e;
+  --color-brand-900: #1e337c;
+
+  --color-accent-50: #e6fbf8;
+  --color-accent-100: #c2f5ee;
+  --color-accent-200: #8bebe0;
+  --color-accent-300: #4cd9cd;
+  --color-accent-400: #1fc4b8;
+  --color-accent-500: #00c2a8;
+  --color-accent-600: #009e8c;
+  --color-accent-700: #007e72;
+  --color-accent-800: #00645c;
+  --color-accent-900: #00534d;
+
+  --font-sans: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #f7f8fa;
+  color: #0f172a;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 文章正文排版（服务端 markdown-it 输出 + 已净化） */
+.prose-content {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #1e293b;
+}
+
+.prose-content h1,
+.prose-content h2,
+.prose-content h3,
+.prose-content h4 {
+  font-weight: 700;
+  color: #0f172a;
+  margin: 1.6em 0 0.7em;
+  line-height: 1.35;
+}
+
+.prose-content h1 {
+  font-size: 1.75rem;
+}
+
+.prose-content h2 {
+  font-size: 1.45rem;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.prose-content h3 {
+  font-size: 1.2rem;
+}
+
+.prose-content p {
+  margin: 0.9em 0;
+}
+
+.prose-content a {
+  color: #2f6bff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose-content strong {
+  font-weight: 600;
+}
+
+.prose-content blockquote {
+  border-left: 4px solid #2f6bff;
+  background: #f1f5f9;
+  padding: 0.6rem 1rem;
+  margin: 1em 0;
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: #475569;
+}
+
+.prose-content code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.3rem;
+  padding: 0.1em 0.35em;
+}
+
+.prose-content pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin: 1.2em 0;
+  line-height: 1.6;
+}
+
+.prose-content pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: 0.875rem;
+}
+
+.prose-content ul,
+.prose-content ol {
+  margin: 0.9em 0;
+  padding-left: 1.5em;
+}
+
+.prose-content ul {
+  list-style: disc;
+}
+
+.prose-content ol {
+  list-style: decimal;
+}
+
+.prose-content li {
+  margin: 0.3em 0;
+}
+
+.prose-content img {
+  max-width: 100%;
+  border-radius: 0.75rem;
+  margin: 1.2em auto;
+  display: block;
+}
+
+.prose-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.2em 0;
+  font-size: 0.925rem;
+}
+
+.prose-content th,
+.prose-content td {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.prose-content th {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.prose-content hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 2em 0;
+}
+
+.prose-content input[type="checkbox"] {
+  margin-right: 0.4em;
+}

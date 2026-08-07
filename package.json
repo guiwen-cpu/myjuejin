@@ -1,0 +1,30 @@
+{
+  "name": "devflow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DevFlow - 类掘金技术社区（monorepo）",
+  "engines": {
+    "node": ">=22.12.0",
+    "pnpm": ">=10"
+  },
+  "packageManager": "pnpm@11.20.0",
+  "scripts": {
+    "dev": "concurrently -n web,api -c cyan,green \"pnpm --filter @devflow/web dev\" \"pnpm --filter @devflow/api start:dev\"",
+    "dev:web": "pnpm --filter @devflow/web dev",
+    "dev:api": "pnpm --filter @devflow/api start:dev",
+    "build": "pnpm --filter @devflow/shared build && pnpm --filter @devflow/api build && pnpm --filter @devflow/web build",
+    "build:web": "pnpm --filter @devflow/web build",
+    "build:api": "pnpm --filter @devflow/api build",
+    "test": "pnpm --filter @devflow/shared build && pnpm --filter @devflow/api test && pnpm --filter @devflow/web test",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write .",
+    "db:migrate": "pnpm --filter @devflow/api prisma:migrate",
+    "db:seed": "pnpm --filter @devflow/api prisma:seed",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "prettier": "^3.6.2"
+  }
+}

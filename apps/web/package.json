@@ -1,0 +1,39 @@
+{
+  "name": "@devflow/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "DevFlow Web - Nuxt 4 + Vue 3 + TypeScript + Tailwind CSS v4",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev --port 3000",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "nuxt typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@devflow/shared": "workspace:*",
+    "@nuxtjs/i18n": "^10.1.0",
+    "@pinia/nuxt": "^0.11.0",
+    "@tailwindcss/vite": "^4.1.11",
+    "@tanstack/vue-query": "^5.83.0",
+    "@tanstack/vue-virtual": "^3.13.12",
+    "lucide-vue-next": "^0.525.0",
+    "md-editor-v3": "^5.4.0",
+    "nuxt": "^4.1.0",
+    "pinia": "^3.0.3",
+    "tailwindcss": "^4.1.11",
+    "vue": "^3.5.17",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "@vue/test-utils": "^2.4.6",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
+    "vue-tsc": "^2.2.12"
+  }
+}

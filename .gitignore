@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.nuxt/
+.output/
+.nitro/
+coverage/
+.env
+.env.*
+!.env.example
+uploads/
+*.log
+.DS_Store
+.idea/
+.vscode/
+*.tsbuildinfo
+apps/web/.data/
+apps/api/prisma/dev.db

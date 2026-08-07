@@ -1,0 +1,132 @@
+{
+  "brand": {
+    "slogan": "技术内容社区"
+  },
+  "nav": {
+    "home": "首页",
+    "write": "写文章",
+    "search": "搜索文章 / 作者",
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出登录",
+    "settings": "个人设置",
+    "profile": "个人主页",
+    "language": "语言",
+    "zh": "中文",
+    "en": "English"
+  },
+  "home": {
+    "feed": "推荐",
+    "hot": "热门",
+    "hotRank": "热门榜",
+    "tagNav": "标签导航",
+    "loadMore": "加载更多",
+    "noMore": "没有更多了",
+    "empty": "暂时没有内容，换个标签看看吧"
+  },
+  "article": {
+    "views": "阅读",
+    "likes": "点赞",
+    "collects": "收藏",
+    "comments": "评论",
+    "like": "点赞",
+    "liked": "已点赞",
+    "collect": "收藏",
+    "collected": "已收藏",
+    "follow": "关注",
+    "following": "已关注",
+    "comment": "发表评论",
+    "commentPlaceholder": "写下你的评论…",
+    "reply": "回复",
+    "delete": "删除",
+    "edit": "编辑",
+    "author": "作者",
+    "publishTime": "发布于",
+    "noComments": "还没有评论，快来抢沙发",
+    "deleteSuccess": "已删除"
+  },
+  "user": {
+    "articles": "文章",
+    "collects": "收藏",
+    "followers": "关注者",
+    "following": "关注",
+    "editProfile": "编辑资料",
+    "joined": "加入时间",
+    "noArticles": "还没有发布过文章",
+    "noCollects": "还没有收藏",
+    "bio": "这个人很懒，什么都没有写"
+  },
+  "write": {
+    "title": "标题",
+    "titlePlaceholder": "请输入文章标题",
+    "summary": "摘要",
+    "summaryPlaceholder": "一句话概括文章内容（可选）",
+    "cover": "封面图 URL",
+    "content": "正文（Markdown）",
+    "tags": "标签",
+    "saveDraft": "保存草稿",
+    "publish": "发布",
+    "publishSuccess": "发布成功",
+    "draftSuccess": "草稿已保存",
+    "editorTip": "支持 Markdown 语法"
+  },
+  "auth": {
+    "username": "用户名",
+    "email": "邮箱",
+    "password": "密码",
+    "loginTitle": "登录 DevFlow",
+    "registerTitle": "注册 DevFlow",
+    "loginBtn": "登录",
+    "registerBtn": "注册",
+    "noAccount": "还没有账号？",
+    "hasAccount": "已有账号？",
+    "goRegister": "去注册",
+    "goLogin": "去登录",
+    "loginSuccess": "登录成功",
+    "registerSuccess": "注册成功",
+    "passwordMin": "密码至少 8 位"
+  },
+  "search": {
+    "placeholder": "搜索文章或作者…",
+    "articles": "文章",
+    "users": "作者",
+    "empty": "没有找到相关内容",
+    "result": "搜索结果"
+  },
+  "common": {
+    "loading": "加载中…",
+    "confirm": "确定",
+    "cancel": "取消",
+    "save": "保存",
+    "saved": "已保存",
+    "upload": "上传",
+    "error": "出错了",
+    "retry": "重试",
+    "back": "返回",
+    "all": "全部"
+  },
+  "errors": {
+    "UNAUTHORIZED": "请先登录",
+    "FORBIDDEN": "没有权限",
+    "NOT_FOUND": "内容不存在",
+    "EMAIL_TAKEN": "该邮箱已被注册",
+    "USERNAME_TAKEN": "该用户名已被占用",
+    "INVALID_CREDENTIALS": "邮箱或密码错误",
+    "INVALID_REFRESH_TOKEN": "登录已过期，请重新登录",
+    "RATE_LIMITED": "操作太频繁，请稍后再试",
+    "INTERNAL_ERROR": "服务器开小差了，请稍后再试",
+    "UPLOAD_TOO_LARGE": "图片太大",
+    "UNSUPPORTED_FILE_TYPE": "仅支持图片文件",
+    "SEARCH_UNAVAILABLE": "搜索暂不可用",
+    "VALIDATION_FAILED": "提交内容有误，请检查"
+  },
+  "footer": {
+    "desc": "DevFlow —— 记录、分享、成长的技术内容社区",
+    "links": "友情链接",
+    "icp": "京ICP备00000000号"
+  },
+  "dev": {
+    "title": "组件预览",
+    "subtitle": "手写 Tailwind UI 组件库展示页"
+  }
+}

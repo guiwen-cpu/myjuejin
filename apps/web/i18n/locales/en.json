@@ -1,0 +1,132 @@
+{
+  "brand": {
+    "slogan": "Developer Content Community"
+  },
+  "nav": {
+    "home": "Home",
+    "write": "Write",
+    "search": "Search articles / authors",
+    "login": "Sign in",
+    "register": "Sign up",
+    "logout": "Sign out",
+    "settings": "Settings",
+    "profile": "Profile",
+    "language": "Language",
+    "zh": "中文",
+    "en": "English"
+  },
+  "home": {
+    "feed": "Feed",
+    "hot": "Hot",
+    "hotRank": "Hot Rank",
+    "tagNav": "Tags",
+    "loadMore": "Load more",
+    "noMore": "No more",
+    "empty": "No content yet, try another tag"
+  },
+  "article": {
+    "views": "views",
+    "likes": "likes",
+    "collects": "saves",
+    "comments": "comments",
+    "like": "Like",
+    "liked": "Liked",
+    "collect": "Save",
+    "collected": "Saved",
+    "follow": "Follow",
+    "following": "Following",
+    "comment": "Comment",
+    "commentPlaceholder": "Write a comment…",
+    "reply": "Reply",
+    "delete": "Delete",
+    "edit": "Edit",
+    "author": "Author",
+    "publishTime": "Published",
+    "noComments": "No comments yet",
+    "deleteSuccess": "Deleted"
+  },
+  "user": {
+    "articles": "Articles",
+    "collects": "Saves",
+    "followers": "Followers",
+    "following": "Following",
+    "editProfile": "Edit profile",
+    "joined": "Joined",
+    "noArticles": "No articles yet",
+    "noCollects": "No saved articles",
+    "bio": "This user has nothing written"
+  },
+  "write": {
+    "title": "Title",
+    "titlePlaceholder": "Enter article title",
+    "summary": "Summary",
+    "summaryPlaceholder": "One-line summary (optional)",
+    "cover": "Cover image URL",
+    "content": "Content (Markdown)",
+    "tags": "Tags",
+    "saveDraft": "Save draft",
+    "publish": "Publish",
+    "publishSuccess": "Published",
+    "draftSuccess": "Draft saved",
+    "editorTip": "Markdown supported"
+  },
+  "auth": {
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "loginTitle": "Sign in to DevFlow",
+    "registerTitle": "Join DevFlow",
+    "loginBtn": "Sign in",
+    "registerBtn": "Sign up",
+    "noAccount": "No account?",
+    "hasAccount": "Already have an account?",
+    "goRegister": "Sign up",
+    "goLogin": "Sign in",
+    "loginSuccess": "Signed in",
+    "registerSuccess": "Signed up",
+    "passwordMin": "Password must be at least 8 characters"
+  },
+  "search": {
+    "placeholder": "Search articles or authors…",
+    "articles": "Articles",
+    "users": "Authors",
+    "empty": "Nothing found",
+    "result": "Search results"
+  },
+  "common": {
+    "loading": "Loading…",
+    "confirm": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saved": "Saved",
+    "upload": "Upload",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "back": "Back",
+    "all": "All"
+  },
+  "errors": {
+    "UNAUTHORIZED": "Please sign in first",
+    "FORBIDDEN": "Permission denied",
+    "NOT_FOUND": "Not found",
+    "EMAIL_TAKEN": "Email already registered",
+    "USERNAME_TAKEN": "Username already taken",
+    "INVALID_CREDENTIALS": "Wrong email or password",
+    "INVALID_REFRESH_TOKEN": "Session expired, please sign in again",
+    "RATE_LIMITED": "Too many requests, try again later",
+    "INTERNAL_ERROR": "Server error, try again later",
+    "UPLOAD_TOO_LARGE": "Image is too large",
+    "UNSUPPORTED_FILE_TYPE": "Images only",
+    "SEARCH_UNAVAILABLE": "Search unavailable",
+    "VALIDATION_FAILED": "Please check your input"
+  },
+  "footer": {
+    "desc": "DevFlow — a developer content community to share and grow",
+    "links": "Links",
+    "icp": "ICP 00000000"
+  },
+  "dev": {
+    "title": "Component Showcase",
+    "subtitle": "Hand-crafted Tailwind UI components"
+  }
+}

@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  username     String     @unique
+  passwordHash String
+  avatar       String?
+  bio          String?    @db.VarChar(300)
+  role         String     @default("user")
+  locale       String     @default("zh")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  articles     Article[]
+  comments     Comment[]
+  likes        Like[]
+  collects     Collect[]
+  following    Follow[]   @relation("follower")
+  followers    Follow[]   @relation("followee")
+
+  @@map("users")
+}
+
+model Article {
+  id           Int          @id @default(autoincrement())
+  authorId     Int
+  author       User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title        String       @db.VarChar(200)
+  summary      String?      @db.VarChar(500)
+  cover        String?
+  contentMd    String       @db.Text
+  contentHtml  String       @db.Text
+  status       String       @default("draft")
+  viewCount    Int          @default(0)
+  likeCount    Int          @default(0)
+  collectCount Int          @default(0)
+  commentCount Int          @default(0)
+  hotScore     Float        @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  publishedAt  DateTime?
+  tags         ArticleTag[]
+  comments     Comment[]
+  likes        Like[]
+  collects     Collect[]
+
+  @@index([status, publishedAt])
+  @@index([status, hotScore])
+  @@index([authorId])
+  @@map("articles")
+}
+
+model Tag {
+  id       Int          @id @default(autoincrement())
+  name     String       @unique
+  slug     String       @unique
+  articles ArticleTag[]
+
+  @@map("tags")
+}
+
+model ArticleTag {
+  articleId Int
+  tagId     Int
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@map("article_tags")
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  articleId Int
+  article   Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  authorId  Int
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parentId  Int?
+  parent    Comment?  @relation("replies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("replies")
+  content   String    @db.VarChar(2000)
+  createdAt DateTime  @default(now())
+
+  @@index([articleId, createdAt])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  articleId Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, articleId])
+  @@map("likes")
+}
+
+model Collect {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  articleId Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, articleId])
+  @@map("collects")
+}
+
+model Follow {
+  followerId Int
+  followeeId Int
+  follower   User     @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followee   User     @relation("followee", fields: [followeeId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([followerId, followeeId])
+  @@map("follows")
+}
