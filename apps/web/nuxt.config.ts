@@ -1,4 +1,5 @@
 import tailwindcss from '@tailwindcss/vite'
+import { resolve } from 'node:path'
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -7,6 +8,11 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   ssr: true,
   components: [{ path: '~/components', pathPrefix: false }],
+
+  // 直接引用 shared 的 TS 源码，避免 dev 模式下 CJS/ESM 产物解析问题
+  alias: {
+    '@devflow/shared': resolve(process.cwd(), '../packages/shared/src/index.ts'),
+  },
 
   vite: {
     plugins: [tailwindcss()],
