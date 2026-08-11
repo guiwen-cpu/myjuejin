@@ -4,8 +4,12 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-devflow}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-strong-password}
       POSTGRES_DB: ${POSTGRES_DB:-devflow}
+    ports:
+      # 仅绑定本机回环地址：给本地开发用（本机 pnpm dev 的 API 需要连）
+      # 不绑定 0.0.0.0，避免对外暴露数据库端口
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -19,6 +23,8 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     command: redis-server --appendonly yes
+    ports:
+      - "127.0.0.1:6379:6379"
     volumes:
       - redisdata:/data
     healthcheck:
@@ -34,6 +40,8 @@ services:
     environment:
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-devflow-meili-master-key}
       MEILI_ENV: production
+    ports:
+      - "127.0.0.1:7700:7700"
     volumes:
       - meilidata:/meili_data
     networks: [devflow]
@@ -46,15 +54,16 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-devflow}:${POSTGRES_PASSWORD:-devflow}@postgres:5432/${POSTGRES_DB:-devflow}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-devflow}:${POSTGRES_PASSWORD:-change-me-strong-password}@postgres:5432/${POSTGRES_DB:-devflow}?schema=public
       REDIS_URL: redis://redis:6379
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET required}
+      # 默认值仅供本地开发快速上手；生产部署务必在 .env 里覆盖为强随机值
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-devflow-access-secret-change-me}
       ACCESS_TOKEN_TTL_SECONDS: "1800"
       REFRESH_TOKEN_TTL_SECONDS: "604800"
-      CORS_ORIGINS: ${CORS_ORIGINS}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
       MEILI_HOST: http://meilisearch:7700
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-devflow-meili-master-key}
-      PUBLIC_API_URL: ${PUBLIC_API_URL}
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:3001}
       UPLOAD_DIR: ./uploads
       MAX_FILE_SIZE_MB: "5"
       OSS_REGION: ${OSS_REGION:-}
@@ -86,7 +95,7 @@ services:
       HOST: 0.0.0.0
       PORT: 3000
       API_INTERNAL_URL: http://api:3000
-      NUXT_PUBLIC_SITE_URL: ${NUXT_PUBLIC_SITE_URL}
+      NUXT_PUBLIC_SITE_URL: ${NUXT_PUBLIC_SITE_URL:-http://localhost:3000}
     depends_on:
       - api
     networks: [devflow]

@@ -9,6 +9,7 @@
   },
   "packageManager": "pnpm@11.20.0",
   "scripts": {
+    "postinstall": "pnpm --filter @devflow/shared build",
     "dev": "concurrently -n web,api -c cyan,green \"pnpm --filter @devflow/web dev\" \"pnpm --filter @devflow/api start:dev\"",
     "dev:web": "pnpm --filter @devflow/web dev",
     "dev:api": "pnpm --filter @devflow/api start:dev",
