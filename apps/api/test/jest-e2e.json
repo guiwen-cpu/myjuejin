@@ -4,9 +4,9 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.ts$": ["ts-jest", { "tsconfig": "../tsconfig.json" }]
+    "^.+\\.ts$": ["ts-jest", { "tsconfig": "<rootDir>/../tsconfig.json" }]
   },
   "moduleNameMapper": {
-    "^@devflow/shared$": "<rootDir>/../../../packages/shared/dist/index.js"
+    "^@devflow/shared$": "<rootDir>/../../../packages/shared/src/index.ts"
   }
 }

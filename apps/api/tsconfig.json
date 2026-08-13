@@ -13,6 +13,7 @@
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
+    "isolatedModules": true,
     "strict": true,
     "strictPropertyInitialization": false,
     "forceConsistentCasingInFileNames": true,

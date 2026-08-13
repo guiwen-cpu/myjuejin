@@ -94,7 +94,7 @@ services:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3000
-      API_INTERNAL_URL: http://api:3000
+      API_INTERNAL_URL: http://api:3000/api/v1
       NUXT_PUBLIC_SITE_URL: ${NUXT_PUBLIC_SITE_URL:-http://localhost:3000}
     depends_on:
       - api

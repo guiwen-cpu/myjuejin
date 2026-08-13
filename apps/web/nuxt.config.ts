@@ -1,5 +1,4 @@
 import tailwindcss from '@tailwindcss/vite'
-import { resolve } from 'node:path'
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -8,19 +7,14 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   ssr: true,
   components: [{ path: '~/components', pathPrefix: false }],
-
-  // 直接引用 shared 的 TS 源码，避免 dev 模式下 CJS/ESM 产物解析问题
-  alias: {
-    '@devflow/shared': resolve(process.cwd(), '../packages/shared/src/index.ts'),
-  },
-
   vite: {
     plugins: [tailwindcss()],
   },
 
   runtimeConfig: {
-    // 服务端直连 API（容器内网 / 本地 dev 地址）
-    apiBase: process.env.API_INTERNAL_URL || 'http://localhost:3001',
+    // 服务端直连 API（容器内网 / 本地 dev 地址），需要带上 /api/v1 全局前缀。
+    // 用 127.0.0.1 而非 localhost，避免 Windows 下 localhost 优先解析到 IPv6 ::1。
+    apiBase: process.env.API_INTERNAL_URL || 'http://127.0.0.1:3001/api/v1',
     public: {
       // 浏览器侧走同源代理（nginx / nitro devProxy）
       apiBase: '/api/v1',
@@ -49,7 +43,9 @@ export default defineNuxtConfig({
   nitro: {
     devProxy: {
       '/api': {
-        target: process.env.API_PROXY_TARGET || 'http://localhost:3001',
+        // h3 匹配 '/api' 前缀路由时会剥掉 /api 再转发，所以 target 需补上 /api，
+        // 这样 /api/v1/articles -> /v1/articles -> http://127.0.0.1:3001/api/v1/articles。
+        target: process.env.API_PROXY_TARGET || 'http://127.0.0.1:3001/api',
         changeOrigin: true,
       },
     },
