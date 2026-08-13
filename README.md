@@ -1,6 +1,6 @@
 # DevFlow 类掘金技术社区（monorepo）
 
-从 0 到 1 实现的技术内容社区：Vue 3 + Nuxt 4（SSR）+ NestJS + PostgreSQL + Redis + Meilisearch，Docker 容器化部署，面向国内云 + CDN 上线。
+从 0 到 1 实现的技术内容社区：Vue 3 + Nuxt 4（SSR）+ NestJS + PostgreSQL + Redis + Meilisearch，Docker 容器化部署，面向国内云 + CDN 上线。22
 
 ## 技术栈
 
