@@ -7,6 +7,8 @@ coverage/
 .env
 .env.*
 !.env.example
+!.env.staging.example
+!.env.prod.example
 uploads/
 *.log
 .DS_Store

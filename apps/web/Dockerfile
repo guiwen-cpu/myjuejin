@@ -80,6 +80,9 @@ ENV NODE_ENV=production
 
 # 先编译共享类型包（web 依赖它的 dist 产物），再编译 Nuxt 前端。
 # 编译结果会输出到 apps/web/.output。
+# 当前环境的站点 URL 通过构建参数注入（Nuxt public config 会内联到客户端包）。
+ARG NUXT_PUBLIC_SITE_URL
+ENV NUXT_PUBLIC_SITE_URL=$NUXT_PUBLIC_SITE_URL
 RUN pnpm --filter @devflow/shared build
 RUN pnpm --filter @devflow/web build
 
@@ -94,7 +97,7 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 
 # 容器内工作目录
-WORKDIR /app
+# WORKDIR /app
 
 # 把阶段 3 编译出的 .output（Nuxt 的完整运行包：服务端代码 + 静态资源）
 # 拷进最终镜像。这是最终镜像里唯一的"业务文件"。

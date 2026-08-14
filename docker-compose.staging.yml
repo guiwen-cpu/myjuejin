@@ -1,0 +1,61 @@
+# =====================================================================
+# docker-compose.staging.yml —— staging 环境的"覆盖文件"（新手向注释）
+#
+# 这个文件单独用没有意义，必须和主文件 docker-compose.yml 叠加使用：
+#   docker compose -p devflow-staging --env-file .env.staging \
+#     -f docker-compose.yml -f docker-compose.staging.yml up -d --no-build
+#   （-p 指定项目名；--env-file 指定读哪个 .env 文件；-f 可以传多个配置文件）
+#
+# 什么是"覆盖文件"？
+#   Compose 会把多个 -f 文件"合并"成一份配置再执行：
+#   - 主文件 docker-compose.yml 定义了全部服务（postgres/redis/api/web/nginx...）
+#   - 这个文件只改 api 和 web 两个服务：写了就覆盖，没写就继承主文件的
+#   - environment 是"键值对"形式，合并规则是"同名键覆盖，其他键保留"
+#
+# 为什么服务器部署用 image: 而不是 build:？
+#   - 本地开发：docker compose up 会用主文件里的 build: 现场构建镜像
+#   - 服务器部署：CI 已经在 GitHub Actions 里构建好镜像并推到阿里云 ACR，
+#     这里用 image: 直接指定"从 ACR 拉哪个镜像"，服务器不再重复构建
+#
+# -p devflow-staging（项目名）的作用：
+#   同一台机器上 staging 和 prod 用同一份主文件，但项目名不同，
+#   容器、网络、数据卷都会自动带上前缀 devflow-staging_ / devflow-prod_，
+#   两套环境的数据库、上传文件等数据完全隔离，互不干扰。
+# =====================================================================
+services:
+  # ---------- 后端 API（只覆盖镜像和环境变量，其余继承主文件）----------
+  api:
+    # 镜像地址 = ACR 仓库前缀 / 仓库名 : 标签
+    #   ${ACR_REGISTRY}         在 .env.staging 里配置，如 registry.cn-hangzhou.aliyuncs.com/devflow
+    #   devflow-api             镜像仓库名
+    #   staging-${DEVFLOW_SHA}  标签 = staging-<Git 提交号>，由 deploy.sh 导出 DEVFLOW_SHA
+    # 每次部署拉取对应提交号的镜像；回滚就是换成旧提交号的镜像重新 up
+    image: ${ACR_REGISTRY}/devflow-api:staging-${DEVFLOW_SHA}
+    # 容器意外退出自动重启，服务器上挂了能自己拉起来
+    restart: unless-stopped
+    environment:
+      # 运行模式：production（生产模式）。注意这不是"部署环境"开关，
+      # staging 和 prod 都应该跑生产模式；环境差异靠下面的变量区分。
+      NODE_ENV: production
+      # 数据库连接串。@postgres:5432 里的 postgres 是主文件里的服务名，
+      # 同一个 Compose 网络里服务名可以直接当域名用，不用写 IP。
+      # 账号/密码/库名来自 .env.staging 的 POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      # 允许哪些前端来源跨域访问 API（staging 一般是 http://服务器IP:8080）
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      # 对外公开的 API 地址，用于生成上传文件的访问链接等
+      PUBLIC_API_URL: ${PUBLIC_API_URL}
+
+  # ---------- 前端 Nuxt（只覆盖镜像和环境变量）----------
+  web:
+    image: ${ACR_REGISTRY}/devflow-web:staging-${DEVFLOW_SHA}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # 站点对外 URL：Nuxt 用它生成 SEO 标签、规范链接等。
+      # 注意：这个值在 CI 构建时还会作为 build-arg 打进前端包（客户端代码也要用），
+      # 所以必须和 GitHub 变量 NUXT_PUBLIC_SITE_URL_STAGING 保持一致。
+      NUXT_PUBLIC_SITE_URL: ${NUXT_PUBLIC_SITE_URL}
+      # 服务端直连 API：web 和 api 在同一个 Compose 网络里，
+      # 用服务名 api + 容器端口 3000 访问，走内网不走公网。
+      API_INTERNAL_URL: http://api:3000/api/v1

@@ -1,0 +1,208 @@
+# =====================================================================
+# ci.yml —— GitHub Actions 工作流（新手向注释）
+#
+# 这个文件是"自动化流水线"的说明书，放在 .github/workflows/ 下就会被 GitHub 识别。
+# 只要满足下面的触发条件，GitHub 就会在它的云服务器（runner）上自动执行里面的任务，
+# 不需要你手动操作。
+#
+# 何时执行（on 触发条件）：
+#   1. 任何 pull_request（提 PR / 更新 PR）→ 只跑 ci 任务（代码检查 + 测试）
+#   2. push 到 dev 分支 → 构建并推镜像 → 自动部署 staging
+#   3. push 到 main 分支 → 构建并推镜像 → 等人工审批 → 自动部署 prod
+#
+# 三个任务（jobs）是接力关系：
+#   ci（检查）→ build-push（构建镜像推 ACR）→ deploy-staging / deploy-prod（SSH 部署）
+# =====================================================================
+
+# 工作流显示名（GitHub 的 Actions 页面看到的名字）
+name: CI/CD
+
+# 触发条件：哪些事件会启动这个流水线
+on:
+  pull_request:            # 有 PR 时（含 PR 后续更新）
+  push:                    # 有 push 时
+    branches: [dev, main]  # 只监听 dev 和 main 两个分支
+
+# 并发控制：同一个分支同时只跑一个流水线；
+# 新的 push 会取消旧的那次还没跑完的（避免部署撞车）
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------- 任务 1：代码检查 + 测试（PR 和 push 都会跑）----------------
+  ci:
+    name: Lint & Test
+    runs-on: ubuntu-latest   # 跑在 GitHub 提供的 Ubuntu 云机器上
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4   # 把仓库代码下载到这台云机器上
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4  # 安装 pnpm（版本自动读 package.json 的 packageManager）
+
+      - name: Setup Node
+        uses: actions/setup-node@v4  # 安装 Node.js 22，并用 pnpm 缓存依赖加速
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile  # 严格按锁文件装依赖，保证与本地一致
+
+      - name: Lint
+        run: pnpm lint                       # 类型检查（TS 编译检查）
+
+      - name: Test
+        run: pnpm test                       # 跑单元测试（web vitest + api jest）
+
+  # ---------------- 任务 2：构建镜像并推送到阿里云 ACR ----------------
+  # 只有"push 到 dev/main"才跑（PR 不构建）。needs: ci 表示 ci 通过后才轮到它。
+  build-push:
+    name: Build & Push Images
+    needs: ci
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    # outputs 是"任务输出"，把后面部署要用的值传给下游任务：
+    #   env（staging/prod）、sha（镜像标签用的短提交号）、commit（完整提交号）
+    outputs:
+      env: ${{ steps.target.outputs.env }}
+      sha: ${{ steps.target.outputs.sha }}
+      commit: ${{ steps.target.outputs.commit }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 判断这次 push 到的是哪个分支，决定部署到哪个环境。
+      # GitHub 表达式的语法是 ${{ }}；结果写进"步骤输出"（$GITHUB_OUTPUT）
+      - name: Resolve deployment target
+        id: target
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/dev" ]; then
+            echo "env=staging" >> "$GITHUB_OUTPUT"
+            echo "site_url=${{ vars.NUXT_PUBLIC_SITE_URL_STAGING }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "env=prod" >> "$GITHUB_OUTPUT"
+            echo "site_url=${{ vars.NUXT_PUBLIC_SITE_URL_PROD }}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "sha=${GITHUB_SHA:0:12}" >> "$GITHUB_OUTPUT"   # 提交号前 12 位，当镜像标签
+          echo "commit=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"     # 完整提交号，给服务器 git checkout 用
+
+      # 从 ACR_REGISTRY（含命名空间）里截取出"登录地址"（域名部分）。
+      # 例：registry.cn-hangzhou.aliyuncs.com/devflow
+      #   -> registry.cn-hangzhou.aliyuncs.com
+      - name: Resolve ACR registry host
+        id: acr
+        env:
+          ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}   # secrets 从 GitHub 仓库/环境配置里读取
+        run: |
+          if [[ "$ACR_REGISTRY" == */* ]]; then
+            echo "host=${ACR_REGISTRY%/*}" >> "$GITHUB_OUTPUT"
+          else
+            echo "host=${ACR_REGISTRY}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3   # 启用 Buildx（带缓存的镜像构建）
+
+      - name: Login to ACR
+        uses: docker/login-action@v3          # 登录阿里云镜像仓库，之后才能 push
+        with:
+          registry: ${{ steps.acr.outputs.host }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # 构建前端 web 镜像并推送。
+      # tags 打两个标签：staging-<sha>（本次精确版本，部署/回滚用）+ staging-latest（最新版）
+      # build-args 把站点 URL 传进 Dockerfile（构建期写入前端包）
+      # cache-from/to 把构建缓存存进 ACR，下次构建更快
+      - name: Build & push web
+        uses: docker/build-push-action@v6
+        with:
+          context: .                          # 构建上下文 = 仓库根目录
+          file: apps/web/Dockerfile           # 用哪个 Dockerfile
+          push: true                          # 构建完推送到镜像仓库
+          tags: |
+            ${{ secrets.ACR_REGISTRY }}/devflow-web:${{ steps.target.outputs.env }}-${{ steps.target.outputs.sha }}
+            ${{ secrets.ACR_REGISTRY }}/devflow-web:${{ steps.target.outputs.env }}-latest
+          build-args: |
+            NUXT_PUBLIC_SITE_URL=${{ steps.target.outputs.site_url }}
+          cache-from: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devflow-web:buildcache
+          cache-to: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devflow-web:buildcache,mode=max
+
+      # 构建后端 api 镜像并推送（同样打两个标签，没有构建参数）
+      - name: Build & push api
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.ACR_REGISTRY }}/devflow-api:${{ steps.target.outputs.env }}-${{ steps.target.outputs.sha }}
+            ${{ secrets.ACR_REGISTRY }}/devflow-api:${{ steps.target.outputs.env }}-latest
+          cache-from: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devflow-api:buildcache
+          cache-to: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devflow-api:buildcache,mode=max
+
+  # ---------------- 任务 3a：部署 staging ----------------
+  # push 到 dev 才跑，不需要审批。
+  # environment: staging 表示这个任务使用"staging 环境"的 secrets（也可在 GitHub 上设保护规则）
+  deploy-staging:
+    name: Deploy Staging
+    needs: build-push            # 等镜像构建推送完成
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 把服务器的 SSH 私钥注入 runner，后面的 ssh 命令才能免密登录服务器
+      - name: Load SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
+
+      - name: Deploy via SSH
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}   # 服务器 IP
+          SERVER_USER: ${{ secrets.SERVER_USER }}   # 登录用户名（如 root）
+          SHA: ${{ needs.build-push.outputs.sha }}       # 从任务 2 拿镜像标签 sha
+          COMMIT: ${{ needs.build-push.outputs.commit }} # 完整提交号
+        run: |
+          # 远程在服务器上执行一整条命令：
+          #   1. cd 到服务器上的仓库目录
+          #   2. git fetch + checkout 到这次提交（保证服务器上的脚本/配置与代码一致）
+          #   3. 调用 deploy/deploy.sh 完成真正的部署
+          ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
+            "${SERVER_USER}@${SERVER_HOST}" \
+            "cd /srv/devflow && git fetch origin && git checkout --force ${COMMIT} && bash deploy/deploy.sh staging ${SHA}"
+
+  # ---------------- 任务 3b：部署 prod ----------------
+  # push 到 main 才跑。environment: prod 在 GitHub 上配置了"需要人工审批"，
+  # 所以跑到这个任务时会暂停，等指定的人批准后才真正执行（生产环境的安全闸门）。
+  deploy-prod:
+    name: Deploy Prod
+    needs: build-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Load SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
+
+      - name: Deploy via SSH
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SHA: ${{ needs.build-push.outputs.sha }}
+          COMMIT: ${{ needs.build-push.outputs.commit }}
+        run: |
+          # 与 staging 部署唯一区别：调用 deploy.sh prod <sha>，项目名变成 devflow-prod
+          ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
+            "${SERVER_USER}@${SERVER_HOST}" \
+            "cd /srv/devflow && git fetch origin && git checkout --force ${COMMIT} && bash deploy/deploy.sh prod ${SHA}"

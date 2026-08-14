@@ -1,15 +1,40 @@
+# =====================================================================
+# docker-compose.yml —— Compose 主文件（新手向注释）
+#
+# 这份文件定义了整套应用由哪些"服务"组成，每个服务对应一个容器：
+#   postgres（数据库）/ redis（缓存）/ meilisearch（搜索）/
+#   api（后端 NestJS）/ web（前端 Nuxt）/ nginx（入口反向代理）/ certbot（HTTPS 证书）
+#
+# 新手必懂的概念：
+#   services:    下面每个缩进的服务名就是一个容器
+#   image:       直接用哪个现成镜像（如 postgres:16-alpine）
+#   build:       用哪个 Dockerfile 现场构建（api/web 没有现成镜像，要自己构建）
+#   ports:       端口映射，格式"宿主端口:容器端口"，把容器内部端口暴露到外面
+#   volumes:     数据卷，容器删了重建数据也不丢（数据库、上传文件等）
+#   environment: 注入容器里的环境变量，相当于给容器"配环境"
+#   networks:    同网络内的容器用"服务名"互相访问，当域名用（如 http://api:3000）
+#
+# 关于 ${变量:-默认值}：
+#   Compose 的"变量插值"。执行 docker compose 时会从 .env 文件或 shell 环境读取
+#   同名变量，没读到就用冒号后的默认值。例如 ${NGINX_HTTP_PORT:-80}：
+#   设置了 NGINX_HTTP_PORT 就用它，没设置就用 80。
+#   "同一份配置换一套 .env 就是另一个环境"靠的就是这个机制。
+# =====================================================================
 services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
+      # 数据库账号/密码/库名：来自根目录 .env（本地）或 .env.staging/.env.prod（服务器）
       POSTGRES_USER: ${POSTGRES_USER:-devflow}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-strong-password}
       POSTGRES_DB: ${POSTGRES_DB:-devflow}
     ports:
-      # 仅绑定本机回环地址：给本地开发用（本机 pnpm dev 的 API 需要连）
-      # 不绑定 0.0.0.0，避免对外暴露数据库端口
-      - "127.0.0.1:5432:5432"
+      # 端口映射格式："宿主端口:容器端口"，把容器内部端口暴露给宿主机
+      # 127.0.0.1 前缀：只允许本机访问（本地 pnpm dev 的 API 要连），不暴露公网
+      # ${POSTGRES_HOST_PORT:-5432}：默认 5432；staging 在 .env.staging 里改成
+      # 15432，和 prod 的 5432 错开，同一台机器两套环境才不会抢端口
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -24,7 +49,8 @@ services:
     restart: unless-stopped
     command: redis-server --appendonly yes
     ports:
-      - "127.0.0.1:6379:6379"
+      # Redis 默认 6379；staging 在 .env.staging 里改成 16379 与 prod 错开
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
     volumes:
       - redisdata:/data
     healthcheck:
@@ -41,7 +67,8 @@ services:
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-devflow-meili-master-key}
       MEILI_ENV: production
     ports:
-      - "127.0.0.1:7700:7700"
+      # Meilisearch 默认 7700；staging 在 .env.staging 里改成 17700 与 prod 错开
+      - "127.0.0.1:${MEILI_HOST_PORT:-7700}:7700"
     volumes:
       - meilidata:/meili_data
     networks: [devflow]
@@ -52,33 +79,46 @@ services:
       dockerfile: apps/api/Dockerfile
     restart: unless-stopped
     environment:
+      # 让 NestJS 以生产模式运行（关闭调试、启用压缩等）
       NODE_ENV: production
+      # API 服务自己监听的端口（容器内部）
       PORT: 3000
+      # 数据库连接串。@postgres:5432 里的 postgres 是上面的服务名，
+      # 同一个 Compose 网络里服务名可以直接当域名用，不用写 IP。
+      # 账号/密码/库名来自 .env 或 .env.staging/.env.prod
       DATABASE_URL: postgresql://${POSTGRES_USER:-devflow}:${POSTGRES_PASSWORD:-change-me-strong-password}@postgres:5432/${POSTGRES_DB:-devflow}?schema=public
+      # Redis 地址：同样用服务名 redis 当域名
       REDIS_URL: redis://redis:6379
       # 默认值仅供本地开发快速上手；生产部署务必在 .env 里覆盖为强随机值
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-devflow-access-secret-change-me}
       ACCESS_TOKEN_TTL_SECONDS: "1800"
       REFRESH_TOKEN_TTL_SECONDS: "604800"
+      # 允许跨域访问 API 的前端地址（浏览器请求会被 CORS 拦截）
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      # Meilisearch 地址：用服务名 meilisearch 当域名
       MEILI_HOST: http://meilisearch:7700
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-devflow-meili-master-key}
+      # 对外公开的 API 地址，用于生成上传文件的访问链接
       PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:3001}
       UPLOAD_DIR: ./uploads
       MAX_FILE_SIZE_MB: "5"
+      # OSS 相关：不配置时上传存本地磁盘，配置后自动切到阿里云 OSS
       OSS_REGION: ${OSS_REGION:-}
       OSS_BUCKET: ${OSS_BUCKET:-}
       OSS_ACCESS_KEY_ID: ${OSS_ACCESS_KEY_ID:-}
       OSS_ACCESS_KEY_SECRET: ${OSS_ACCESS_KEY_SECRET:-}
       OSS_PUBLIC_URL: ${OSS_PUBLIC_URL:-}
     volumes:
+      # 上传文件存到命名卷 uploaddata，容器重建文件不丢
       - uploaddata:/app/uploads
     depends_on:
+      # 等 postgres/redis 健康后再启动 api（数据库没就绪时 api 会连库失败）
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
+      # 健康检查：每 20 秒请求一次 /api/v1/health，连续失败 5 次判定不健康
       test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/v1/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 20s
       timeout: 5s
@@ -91,23 +131,39 @@ services:
       dockerfile: apps/web/Dockerfile
     restart: unless-stopped
     environment:
+      # Nuxt 以生产模式运行
       NODE_ENV: production
+      # 监听所有网卡，这样 nginx 容器才能访问到 web 容器
       HOST: 0.0.0.0
+      # 容器内部端口（对外映射由 nginx 负责）
       PORT: 3000
+      # 服务端直连 API：用服务名 api 当域名，走内网不走公网
       API_INTERNAL_URL: http://api:3000/api/v1
+      # 站点对外 URL，Nuxt 生成 SEO/规范链接用；默认本地地址，服务器上由 .env 覆盖
       NUXT_PUBLIC_SITE_URL: ${NUXT_PUBLIC_SITE_URL:-http://localhost:3000}
     depends_on:
       - api
+    healthcheck:
+      # 每 20 秒请求一次首页，失败 5 次判定不健康（部署脚本靠它等 web 就绪）
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
     networks: [devflow]
 
   nginx:
     image: nginx:1.27-alpine
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      # 80 = HTTP 入口，443 = HTTPS 入口（配好证书后启用）
+      # ${NGINX_HTTP_PORT:-80}：默认 80；staging 在 .env.staging 里改成 8080，
+      # 这样 staging 和 prod 的 nginx 才不会都去抢 80 端口
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
     volumes:
+      # 把宿主机上的 nginx 配置文件挂进容器（:ro = 只读），改配置不用重建镜像
       - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # 证书相关目录：certbot 申请到的证书放在命名卷里，nginx 读它
       - certbot-www:/var/www/certbot:ro
       - certbot-certs:/etc/letsencrypt:ro
     depends_on:
@@ -124,6 +180,8 @@ services:
     networks: [devflow]
 
 volumes:
+  # 命名数据卷：数据存在 Docker 管理的磁盘里，容器删了/重建数据不丢。
+  # 命名规则是"项目名_卷名"（如 devflow-prod_pgdata），所以两套环境数据自动隔离。
   pgdata:
   redisdata:
   meilidata:
@@ -132,5 +190,7 @@ volumes:
   certbot-certs:
 
 networks:
+  # 自定义网络：同网络内的容器可以用服务名互相访问。
+  # driver: bridge 是默认的桥接网络模式，容器间通信走内部虚拟网卡。
   devflow:
     driver: bridge
