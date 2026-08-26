@@ -2,7 +2,7 @@
 # docker-compose.prod.yml —— prod 环境的"覆盖文件"（新手向注释）
 #
 # 这个文件单独用没有意义，必须和主文件 docker-compose.yml 叠加使用：
-#   docker compose -p devflow-prod --env-file .env.prod \
+#   docker compose -p devshare-prod --env-file .env.prod \
 #     -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build
 #   （-p 指定项目名；--env-file 指定读哪个 .env 文件；-f 可以传多个配置文件）
 #
@@ -17,20 +17,20 @@
 #   - 服务器部署：CI 已经在 GitHub Actions 里构建好镜像并推到阿里云 ACR，
 #     这里用 image: 直接指定"从 ACR 拉哪个镜像"，服务器不再重复构建
 #
-# -p devflow-prod（项目名）的作用：
+# -p devshare-prod（项目名）的作用：
 #   同一台机器上 staging 和 prod 用同一份主文件，但项目名不同，
-#   容器、网络、数据卷都会自动带上前缀 devflow-prod_ / devflow-staging_，
+#   容器、网络、数据卷都会自动带上前缀 devshare-prod_ / devshare-staging_，
 #   两套环境的数据库、上传文件等数据完全隔离，互不干扰。
 # =====================================================================
 services:
   # ---------- 后端 API（只覆盖镜像和环境变量，其余继承主文件）----------
   api:
     # 镜像地址 = ACR 仓库前缀 / 仓库名 : 标签
-    #   ${ACR_REGISTRY}       在 .env.prod 里配置，如 registry.cn-hangzhou.aliyuncs.com/devflow
-    #   devflow-api           镜像仓库名
-    #   prod-${DEVFLOW_SHA}   标签 = prod-<Git 提交号>，由 deploy.sh 导出 DEVFLOW_SHA
+    #   ${ACR_REGISTRY}       在 .env.prod 里配置，如 registry.cn-hangzhou.aliyuncs.com/devshare
+    #   devshare-api           镜像仓库名
+    #   prod-${DEVSHARE_SHA}   标签 = prod-<Git 提交号>，由 deploy.sh 导出 DEVSHARE_SHA
     # 每次部署拉取对应提交号的镜像；回滚就是换成旧提交号的镜像重新 up
-    image: ${ACR_REGISTRY}/devflow-api:prod-${DEVFLOW_SHA}
+    image: ${ACR_REGISTRY}/devshare-api:prod-${DEVSHARE_SHA}
     # 容器意外退出自动重启，服务器上挂了能自己拉起来
     restart: unless-stopped
     environment:
@@ -48,7 +48,7 @@ services:
 
   # ---------- 前端 Nuxt（只覆盖镜像和环境变量）----------
   web:
-    image: ${ACR_REGISTRY}/devflow-web:prod-${DEVFLOW_SHA}
+    image: ${ACR_REGISTRY}/devshare-web:prod-${DEVSHARE_SHA}
     restart: unless-stopped
     environment:
       NODE_ENV: production

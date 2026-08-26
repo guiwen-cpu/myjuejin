@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-import { DEFAULT_TAGS } from '@devflow/shared'
+import { DEFAULT_TAGS } from '@devshare/shared'
 
 const prisma = new PrismaClient()
 
@@ -34,7 +34,7 @@ const DEMO_TITLES = [
 const DEMO_BODY = (title: string): string => `
 # ${title}
 
-> 这是一篇由种子脚本生成的示例文章，用于演示 DevFlow 的排版与数据流。
+> 这是一篇由种子脚本生成的示例文章，用于演示 DevShare（技享）的排版与数据流。
 
 ## 背景
 
@@ -48,7 +48,7 @@ const DEMO_BODY = (title: string): string => `
 
 \`\`\`ts
 const greeting = (name: string) => \`Hello, \${name}!\`
-console.log(greeting('DevFlow'))
+console.log(greeting('DevShare'))
 \`\`\`
 
 ## 小结
@@ -60,24 +60,24 @@ async function main() {
   const passwordHash = await bcrypt.hash('password123', 10)
 
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@devflow.dev' },
+    where: { email: 'admin@devshare.dev' },
     update: {},
     create: {
-      email: 'admin@devflow.dev',
-      username: 'DevFlowAdmin',
+      email: 'admin@devshare.dev',
+      username: 'DevShareAdmin',
       passwordHash,
       role: 'admin',
-      bio: 'DevFlow 官方账号',
+      bio: 'DevShare（技享）官方账号',
     },
   })
 
   const authors = await Promise.all(
     ['LinDaiDai', 'CodeMaster', 'ByteDancer', 'AsyncAwait', 'TypeScriptFan'].map((name, i) =>
       prisma.user.upsert({
-        where: { email: `${name.toLowerCase()}@devflow.dev` },
+        where: { email: `${name.toLowerCase()}@devshare.dev` },
         update: {},
         create: {
-          email: `${name.toLowerCase()}@devflow.dev`,
+          email: `${name.toLowerCase()}@devshare.dev`,
           username: name,
           passwordHash,
           bio: `热爱技术写作的开发者 #${i + 1}`,

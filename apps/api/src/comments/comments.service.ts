@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import type { Comment } from '@prisma/client'
-import { ErrorCodes, type CommentItem, type Paginated } from '@devflow/shared'
+import { ErrorCodes, type CommentItem, type Paginated } from '@devshare/shared'
 import { PrismaService } from '../prisma/prisma.service'
 import type { AuthenticatedUser } from '../common/decorators/current-user.decorator'
 

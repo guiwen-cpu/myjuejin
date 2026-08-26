@@ -1,9 +1,9 @@
 {
-  "name": "@devflow/web",
+  "name": "@devshare/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "DevFlow Web - Nuxt 4 + Vue 3 + TypeScript + Tailwind CSS v4",
+  "description": "DevShare Web - Nuxt 4 + Vue 3 + TypeScript + Tailwind CSS v4",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev --port 3000",
@@ -15,7 +15,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@devflow/shared": "workspace:*",
+    "@devshare/shared": "workspace:*",
     "@nuxtjs/i18n": "^10.1.0",
     "@pinia/nuxt": "^0.11.0",
     "@tailwindcss/vite": "^4.1.11",

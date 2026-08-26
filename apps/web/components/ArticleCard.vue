@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Eye, Heart, MessageSquare, Star } from 'lucide-vue-next'
-import type { ArticleListItem } from '@devflow/shared'
+import type { ArticleListItem } from '@devshare/shared'
 import { formatCount, timeAgo } from '~/utils/format'
 
 const props = defineProps<{ article: ArticleListItem }>()

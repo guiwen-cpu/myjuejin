@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DEFAULT_TAGS } from '@devflow/shared'
+import { DEFAULT_TAGS } from '@devshare/shared'
 import { LogOut, PenLine, Search, Settings, User } from 'lucide-vue-next'
 import { useAuthStore } from '~/stores/auth'
 
@@ -36,7 +36,7 @@ async function onLogout() {
         >
           D
         </span>
-        <span class="text-lg font-bold tracking-tight text-slate-900">DevFlow</span>
+        <span class="text-lg font-bold tracking-tight text-slate-900">DevShare（技享）</span>
       </NuxtLink>
 
       <nav class="hidden md:flex items-center gap-1 text-sm text-slate-600">

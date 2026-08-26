@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ArticleDetail, TagDTO } from '@devflow/shared'
+import type { ArticleDetail, TagDTO } from '@devshare/shared'
 
 const MdEditor = defineAsyncComponent(async () => {
   const mod = await import('md-editor-v3')

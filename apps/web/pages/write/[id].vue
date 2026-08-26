@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ArticleDetail, TagDTO } from '@devflow/shared'
+import type { ArticleDetail, TagDTO } from '@devshare/shared'
 import { useAuthStore } from '~/stores/auth'
 
 const MdEditor = defineAsyncComponent(async () => {

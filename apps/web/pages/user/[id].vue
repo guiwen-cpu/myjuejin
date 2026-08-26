@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ArticleListItem, Paginated, UserProfile } from '@devflow/shared'
+import type { ArticleListItem, Paginated, UserProfile } from '@devshare/shared'
 import { useAuthStore } from '~/stores/auth'
 
 const route = useRoute()
@@ -42,7 +42,7 @@ async function toggleFollow() {
   profile.value.followerCount += res.followed ? 1 : -1
 }
 
-useHead(() => ({ title: `${profile.value?.username ?? ''} - DevFlow` }))
+useHead(() => ({ title: `${profile.value?.username ?? ''} - DevShare` }))
 </script>
 
 <template>

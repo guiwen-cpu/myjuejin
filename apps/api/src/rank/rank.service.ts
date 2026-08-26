@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import cron from 'node-cron'
-import type { RankItem } from '@devflow/shared'
+import type { RankItem } from '@devshare/shared'
 import { PrismaService } from '../prisma/prisma.service'
 import { RedisService } from '../redis/redis.service'
 import { ArticlesService } from '../articles/articles.service'

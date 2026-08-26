@@ -1,4 +1,4 @@
-import type { ApiErrorBody } from '@devflow/shared'
+import type { ApiErrorBody } from '@devshare/shared'
 import { useAuthStore } from '~/stores/auth'
 
 export interface ApiOptions {

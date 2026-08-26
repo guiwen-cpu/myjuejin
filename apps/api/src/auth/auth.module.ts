@@ -12,7 +12,7 @@ import { JwtStrategy } from './strategies/jwt.strategy'
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_ACCESS_SECRET') ?? 'devflow-access-secret-change-me',
+        secret: config.get<string>('JWT_ACCESS_SECRET') ?? 'devshare-access-secret-change-me',
         signOptions: {
           expiresIn: Number(config.get<string>('ACCESS_TOKEN_TTL_SECONDS') ?? 1800),
         },

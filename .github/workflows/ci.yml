@@ -89,7 +89,7 @@ jobs:
           echo "commit=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"     # 完整提交号，给服务器 git checkout 用
 
       # 从 ACR_REGISTRY（含命名空间）里截取出"登录地址"（域名部分）。
-      # 例：registry.cn-hangzhou.aliyuncs.com/devflow
+      # 例：registry.cn-hangzhou.aliyuncs.com/devshare
       #   -> registry.cn-hangzhou.aliyuncs.com
       - name: Resolve ACR registry host
         id: acr
@@ -123,12 +123,12 @@ jobs:
           file: apps/web/Dockerfile           # 用哪个 Dockerfile
           push: true                          # 构建完推送到镜像仓库
           tags: |
-            ${{ secrets.ACR_REGISTRY }}/devflow-web:${{ steps.target.outputs.env }}-${{ steps.target.outputs.sha }}
-            ${{ secrets.ACR_REGISTRY }}/devflow-web:${{ steps.target.outputs.env }}-latest
+            ${{ secrets.ACR_REGISTRY }}/devshare-web:${{ steps.target.outputs.env }}-${{ steps.target.outputs.sha }}
+            ${{ secrets.ACR_REGISTRY }}/devshare-web:${{ steps.target.outputs.env }}-latest
           build-args: |
             NUXT_PUBLIC_SITE_URL=${{ steps.target.outputs.site_url }}
-          cache-from: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devflow-web:buildcache
-          cache-to: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devflow-web:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devshare-web:buildcache
+          cache-to: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devshare-web:buildcache,mode=max
 
       # 构建后端 api 镜像并推送（同样打两个标签，没有构建参数）
       - name: Build & push api
@@ -138,10 +138,10 @@ jobs:
           file: apps/api/Dockerfile
           push: true
           tags: |
-            ${{ secrets.ACR_REGISTRY }}/devflow-api:${{ steps.target.outputs.env }}-${{ steps.target.outputs.sha }}
-            ${{ secrets.ACR_REGISTRY }}/devflow-api:${{ steps.target.outputs.env }}-latest
-          cache-from: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devflow-api:buildcache
-          cache-to: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devflow-api:buildcache,mode=max
+            ${{ secrets.ACR_REGISTRY }}/devshare-api:${{ steps.target.outputs.env }}-${{ steps.target.outputs.sha }}
+            ${{ secrets.ACR_REGISTRY }}/devshare-api:${{ steps.target.outputs.env }}-latest
+          cache-from: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devshare-api:buildcache
+          cache-to: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devshare-api:buildcache,mode=max
 
   # ---------------- 任务 3a：部署 staging ----------------
   # push 到 dev 才跑，不需要审批。
@@ -175,7 +175,7 @@ jobs:
           #   3. 调用 deploy/deploy.sh 完成真正的部署
           ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
             "${SERVER_USER}@${SERVER_HOST}" \
-            "cd /srv/devflow && git fetch origin && git checkout --force ${COMMIT} && bash deploy/deploy.sh staging ${SHA}"
+            "cd /srv/devshare && git fetch origin && git checkout --force ${COMMIT} && bash deploy/deploy.sh staging ${SHA}"
 
   # ---------------- 任务 3b：部署 prod ----------------
   # push 到 main 才跑。environment: prod 在 GitHub 上配置了"需要人工审批"，
@@ -202,7 +202,7 @@ jobs:
           SHA: ${{ needs.build-push.outputs.sha }}
           COMMIT: ${{ needs.build-push.outputs.commit }}
         run: |
-          # 与 staging 部署唯一区别：调用 deploy.sh prod <sha>，项目名变成 devflow-prod
+          # 与 staging 部署唯一区别：调用 deploy.sh prod <sha>，项目名变成 devshare-prod
           ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
             "${SERVER_USER}@${SERVER_HOST}" \
-            "cd /srv/devflow && git fetch origin && git checkout --force ${COMMIT} && bash deploy/deploy.sh prod ${SHA}"
+            "cd /srv/devshare && git fetch origin && git checkout --force ${COMMIT} && bash deploy/deploy.sh prod ${SHA}"

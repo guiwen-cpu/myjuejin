@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Eye, Heart, MessageSquare, Send, Star } from 'lucide-vue-next'
-import type { ArticleDetail, CommentItem, Paginated } from '@devflow/shared'
+import type { ArticleDetail, CommentItem, Paginated } from '@devshare/shared'
 import { useAuthStore } from '~/stores/auth'
 import { formatCount, timeAgo } from '~/utils/format'
 
@@ -85,7 +85,7 @@ async function deleteComment(comment: CommentItem) {
 }
 
 useHead(() => ({
-  title: article.value ? `${article.value.title} - DevFlow` : 'DevFlow',
+  title: article.value ? `${article.value.title} - DevShare` : 'DevShare',
   meta: [
     {
       name: 'description',

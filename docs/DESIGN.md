@@ -1,8 +1,8 @@
-# DevFlow 设计规范
+# DevShare（技享）设计规范
 
 ## 1. 品牌
 
-- 品牌名：**DevFlow**（占位，可替换）
+- 品牌名：**DevShare（技享）**（占位，可替换）
 - 定位：面向开发者的技术内容社区
 - 标语：中文「技术内容社区」/ 英文 "Developer Content Community"
 

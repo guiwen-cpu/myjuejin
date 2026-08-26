@@ -1,5 +1,5 @@
 {
-  "name": "@devflow/shared",
+  "name": "@devshare/shared",
   "version": "0.1.0",
   "private": true,
   "main": "./dist/index.js",

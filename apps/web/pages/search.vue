@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { User } from 'lucide-vue-next'
-import type { SearchResult } from '@devflow/shared'
+import type { SearchResult } from '@devshare/shared'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -36,7 +36,7 @@ watch(keyword, () => {
 
 onMounted(runSearch)
 
-useHead({ title: `${t('search.result')} - DevFlow` })
+useHead({ title: `${t('search.result')} - DevShare` })
 </script>
 
 <template>

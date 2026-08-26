@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BRAND } from '@devflow/shared'
+import { BRAND } from '@devshare/shared'
 
 const { t } = useI18n()
 const localePath = useLocalePath()

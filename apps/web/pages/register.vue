@@ -32,7 +32,7 @@ async function submit() {
   }
 }
 
-useHead({ title: `${t('auth.registerTitle')} - DevFlow` })
+useHead({ title: `${t('auth.registerTitle')} - DevShare` })
 </script>
 
 <template>

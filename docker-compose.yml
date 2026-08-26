@@ -26,9 +26,9 @@ services:
     restart: unless-stopped
     environment:
       # 数据库账号/密码/库名：来自根目录 .env（本地）或 .env.staging/.env.prod（服务器）
-      POSTGRES_USER: ${POSTGRES_USER:-devflow}
+      POSTGRES_USER: ${POSTGRES_USER:-devshare}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-strong-password}
-      POSTGRES_DB: ${POSTGRES_DB:-devflow}
+      POSTGRES_DB: ${POSTGRES_DB:-devshare}
     ports:
       # 端口映射格式："宿主端口:容器端口"，把容器内部端口暴露给宿主机
       # 127.0.0.1 前缀：只允许本机访问（本地 pnpm dev 的 API 要连），不暴露公网
@@ -38,11 +38,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-devflow}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-devshare}"]
       interval: 10s
       timeout: 5s
       retries: 5
-    networks: [devflow]
+    networks: [devshare]
 
   redis:
     image: redis:7-alpine
@@ -58,20 +58,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks: [devflow]
+    networks: [devshare]
 
   meilisearch:
     image: getmeili/meilisearch:v1.12
     restart: unless-stopped
     environment:
-      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-devflow-meili-master-key}
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-devshare-meili-master-key}
       MEILI_ENV: production
     ports:
       # Meilisearch 默认 7700；staging 在 .env.staging 里改成 17700 与 prod 错开
       - "127.0.0.1:${MEILI_HOST_PORT:-7700}:7700"
     volumes:
       - meilidata:/meili_data
-    networks: [devflow]
+    networks: [devshare]
 
   api:
     build:
@@ -86,18 +86,18 @@ services:
       # 数据库连接串。@postgres:5432 里的 postgres 是上面的服务名，
       # 同一个 Compose 网络里服务名可以直接当域名用，不用写 IP。
       # 账号/密码/库名来自 .env 或 .env.staging/.env.prod
-      DATABASE_URL: postgresql://${POSTGRES_USER:-devflow}:${POSTGRES_PASSWORD:-change-me-strong-password}@postgres:5432/${POSTGRES_DB:-devflow}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-devshare}:${POSTGRES_PASSWORD:-change-me-strong-password}@postgres:5432/${POSTGRES_DB:-devshare}?schema=public
       # Redis 地址：同样用服务名 redis 当域名
       REDIS_URL: redis://redis:6379
       # 默认值仅供本地开发快速上手；生产部署务必在 .env 里覆盖为强随机值
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-devflow-access-secret-change-me}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-devshare-access-secret-change-me}
       ACCESS_TOKEN_TTL_SECONDS: "1800"
       REFRESH_TOKEN_TTL_SECONDS: "604800"
       # 允许跨域访问 API 的前端地址（浏览器请求会被 CORS 拦截）
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
       # Meilisearch 地址：用服务名 meilisearch 当域名
       MEILI_HOST: http://meilisearch:7700
-      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-devflow-meili-master-key}
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-devshare-meili-master-key}
       # 对外公开的 API 地址，用于生成上传文件的访问链接
       PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:3001}
       UPLOAD_DIR: ./uploads
@@ -123,7 +123,7 @@ services:
       interval: 20s
       timeout: 5s
       retries: 5
-    networks: [devflow]
+    networks: [devshare]
 
   web:
     build:
@@ -149,7 +149,7 @@ services:
       interval: 20s
       timeout: 5s
       retries: 5
-    networks: [devflow]
+    networks: [devshare]
 
   nginx:
     image: nginx:1.27-alpine
@@ -169,7 +169,7 @@ services:
     depends_on:
       - web
       - api
-    networks: [devflow]
+    networks: [devshare]
 
   certbot:
     image: certbot/certbot
@@ -177,11 +177,11 @@ services:
     volumes:
       - certbot-www:/var/www/certbot
       - certbot-certs:/etc/letsencrypt
-    networks: [devflow]
+    networks: [devshare]
 
 volumes:
   # 命名数据卷：数据存在 Docker 管理的磁盘里，容器删了/重建数据不丢。
-  # 命名规则是"项目名_卷名"（如 devflow-prod_pgdata），所以两套环境数据自动隔离。
+  # 命名规则是"项目名_卷名"（如 devshare-prod_pgdata），所以两套环境数据自动隔离。
   pgdata:
   redisdata:
   meilidata:
@@ -192,5 +192,5 @@ volumes:
 networks:
   # 自定义网络：同网络内的容器可以用服务名互相访问。
   # driver: bridge 是默认的桥接网络模式，容器间通信走内部虚拟网卡。
-  devflow:
+  devshare:
     driver: bridge

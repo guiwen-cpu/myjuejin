@@ -14,8 +14,8 @@
 #
 # 它做的事（从上到下）:
 #   1. 检查参数（环境名 + 镜像标签 sha）
-#   2. 进入服务器上的仓库目录（默认 /srv/devflow）
-#   3. 用"项目名 devflow-<环境>" + 对应 .env.<环境> + 对应覆盖文件，拼出 compose 命令
+#   2. 进入服务器上的仓库目录（默认 /srv/devshare）
+#   3. 用"项目名 devshare-<环境>" + 对应 .env.<环境> + 对应覆盖文件，拼出 compose 命令
 #   4. 从 ACR 拉取 web/api 两个新镜像
 #   5. docker compose up 启动整套服务（--no-build 表示绝不现场构建）
 #   6. 循环检查 api 健康接口 + web 首页，最多等 3 分钟
@@ -52,17 +52,17 @@ case "$ENV_NAME" in
 esac
 
 # ---------------------------- 准备工作目录 ----------------------------
-# 仓库在服务器上的位置。${REPO_DIR:-/srv/devflow} 表示：
-# 如果设置了环境变量 REPO_DIR 就用它，否则用默认值 /srv/devflow。
-REPO_DIR="${REPO_DIR:-/srv/devflow}"
+# 仓库在服务器上的位置。${REPO_DIR:-/srv/devshare} 表示：
+# 如果设置了环境变量 REPO_DIR 就用它，否则用默认值 /srv/devshare。
+REPO_DIR="${REPO_DIR:-/srv/devshare}"
 cd "$REPO_DIR"   # 进入仓库目录，后面所有相对路径都基于这里
 
 # 根据环境名拼出对应的文件名：
-#   staging -> .env.staging / docker-compose.staging.yml / devflow-staging / .last-staging
-#   prod    -> .env.prod    / docker-compose.prod.yml    / devflow-prod    / .last-prod
+#   staging -> .env.staging / docker-compose.staging.yml / devshare-staging / .last-staging
+#   prod    -> .env.prod    / docker-compose.prod.yml    / devshare-prod    / .last-prod
 ENV_FILE=".env.${ENV_NAME}"                    # 这个环境的密钥/配置（不在 git 里）
 COMPOSE_FILE="docker-compose.${ENV_NAME}.yml"  # 这个环境的 compose 覆盖文件（在 git 里）
-PROJECT="devflow-${ENV_NAME}"                  # Compose 项目名，用来隔离两套环境
+PROJECT="devshare-${ENV_NAME}"                  # Compose 项目名，用来隔离两套环境
 LAST_FILE=".last-${ENV_NAME}"                  # 记录上次成功部署的 sha，用于回滚
 
 # 检查 .env.<环境> 是否存在（它存了数据库密码等密钥，只在服务器上手工创建）
@@ -73,7 +73,7 @@ fi
 
 # ---------------------------- 拼 compose 命令 ----------------------------
 # 这里定义了一个 bash "数组"，里面是一整条 docker compose 命令的参数：
-#   -p devflow-<环境>        指定项目名（容器/网络/卷都带这个前缀，实现两套环境隔离）
+#   -p devshare-<环境>        指定项目名（容器/网络/卷都带这个前缀，实现两套环境隔离）
 #   --env-file .env.<环境>   指定读哪个 .env 文件（变量插值的数据来源）
 #   -f docker-compose.yml    主文件（定义所有服务）
 #   -f docker-compose.<环境>.yml  环境覆盖文件（只改 api/web 的镜像和环境变量）
@@ -90,10 +90,10 @@ rollback() {
   if [ -n "$PREV" ] && [ "$PREV" != "$SHA" ]; then
     echo "==> [$PROJECT] rolling back to previous image sha: $PREV"
     # 用"旧 sha"重新拉镜像并重启 web/api。
-    # 注意 DEVFLOW_SHA=xxx 写在命令前面 = 只对这条命令临时设置环境变量，
-    # compose 里 ${DEVFLOW_SHA} 会插值成旧 sha，所以拉的就是旧镜像。
-    DEVFLOW_SHA="$PREV" "${COMPOSE[@]}" pull web api
-    DEVFLOW_SHA="$PREV" "${COMPOSE[@]}" up -d --no-build web api
+    # 注意 DEVSHARE_SHA=xxx 写在命令前面 = 只对这条命令临时设置环境变量，
+    # compose 里 ${DEVSHARE_SHA} 会插值成旧 sha，所以拉的就是旧镜像。
+    DEVSHARE_SHA="$PREV" "${COMPOSE[@]}" pull web api
+    DEVSHARE_SHA="$PREV" "${COMPOSE[@]}" up -d --no-build web api
   else
     echo "==> [$PROJECT] no previous sha recorded; leaving current state for manual inspection"
   fi
@@ -117,8 +117,8 @@ wait_healthy() {
 
 # ---------------------------- 正式部署流程 ----------------------------
 # export 把 sha 变成环境变量传给 docker compose，覆盖文件里
-# ${DEVFLOW_SHA} 就会插值成这次部署的 sha，从而拼出正确的镜像标签。
-export DEVFLOW_SHA="$SHA"
+# ${DEVSHARE_SHA} 就会插值成这次部署的 sha，从而拼出正确的镜像标签。
+export DEVSHARE_SHA="$SHA"
 
 echo "==> [$PROJECT] pulling images @ $SHA"
 # 只拉 web 和 api 两个镜像（postgres/redis 等用官方镜像，不用每次拉）

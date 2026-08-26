@@ -1,4 +1,4 @@
-# DevFlow 部署手册
+# DevShare（技享）部署手册
 
 > 目标架构：一台 ECS（Docker Compose）同时承载 **staging** 与 **prod** 两套环境，
 > 每套环境各自独立的 web / api / postgres / redis / meilisearch / nginx 容器与数据卷，
@@ -9,13 +9,13 @@
 
 - **staging**：`dev` 分支推送后自动部署，入口 `http://<服务器IP>:8080`，数据与 prod 完全隔离。
 - **prod**：`main` 分支推送后，需在 GitHub 上人工审批，再自动部署；入口域名 80/443 + certbot。
-- 两套环境在同一台 ECS 上以两个 Compose 项目运行：`devflow-staging` 与 `devflow-prod`。
+- 两套环境在同一台 ECS 上以两个 Compose 项目运行：`devshare-staging` 与 `devshare-prod`。
 - `NODE_ENV` 恒为 `production`（运行模式，不是环境开关）；环境差异全部由服务器上的
   `.env.staging` / `.env.prod` 注入。
 
 ## 1. 域名与备案（并行，先启动）
 
-1. 在阿里云"域名注册"购买域名（如 `devflow.dev`）。
+1. 在阿里云"域名注册"购买域名（如 `devshare.dev`）。
 2. 在"ICP 备案"控制台提交备案申请（个人备案约 1-2 周）。
 3. **备案完成前**：域名不得解析到大陆服务器公网访问，可用 `http://服务器IP:8080` 临时验收。
 4. 备案通过后：域名解析记录（A 记录指向 ECS IP，或 CNAME 到 CDN 加速域名）。
@@ -36,9 +36,9 @@ sudo systemctl enable --now docker
 
 ### 3.1 阿里云 ACR
 
-1. 开通容器镜像服务（个人版即可），创建命名空间（如 `devflow`），创建镜像仓库 `devflow-web` 与 `devflow-api`。
+1. 开通容器镜像服务（个人版即可），创建命名空间（如 `devshare`），创建镜像仓库 `devshare-web` 与 `devshare-api`。
 2. 在"访问凭证"页设置固定密码，供 `docker login` 使用。
-3. 记录仓库地址，格式：`registry.cn-<region>.aliyuncs.com/<namespace>`（如 `registry.cn-hangzhou.aliyuncs.com/devflow`）。
+3. 记录仓库地址，格式：`registry.cn-<region>.aliyuncs.com/<namespace>`（如 `registry.cn-hangzhou.aliyuncs.com/devshare`）。
 
 ### 3.2 GitHub 仓库配置
 
@@ -69,7 +69,7 @@ sudo systemctl enable --now docker
 ## 4. 服务器首次初始化（一次性）
 
 ```bash
-git clone <your-repo> /srv/devflow && cd /srv/devflow
+git clone <your-repo> /srv/devshare && cd /srv/devshare
 cp .env.staging.example .env.staging
 cp .env.prod.example .env.prod
 vi .env.staging   # 填 staging 端口、域名、密钥
@@ -88,7 +88,7 @@ bash deploy/deploy.sh prod <sha>        # 全新 prod：自动建库 + 迁移
 全新 staging 环境如需初始数据，手动执行 seed（prod 永不自动 seed）：
 
 ```bash
-docker compose -p devflow-staging --env-file .env.staging \
+docker compose -p devshare-staging --env-file .env.staging \
   -f docker-compose.yml -f docker-compose.staging.yml \
   exec -T api npx prisma db seed
 ```
@@ -103,7 +103,7 @@ docker compose -p devflow-staging --env-file .env.staging \
 - push `main`：构建（tag `prod-<sha>` 与 `prod-latest`）→ 推送 ACR → 等待 GitHub `prod` 环境审批 →
   SSH 执行 `deploy/deploy.sh prod <sha>` → 健康检查 → 自动执行迁移。
 
-手动部署 / 回滚（在服务器 `/srv/devflow` 下执行）：
+手动部署 / 回滚（在服务器 `/srv/devshare` 下执行）：
 
 ```bash
 bash deploy/deploy.sh staging <旧sha>              # 回滚 staging 到指定镜像
@@ -115,16 +115,16 @@ bash deploy/deploy.sh prod <sha> --no-migrate      # 只换镜像不跑迁移
 健康检查或迁移失败时自动回滚到上一个 sha。prod 迁移前建议先备份数据库：
 
 ```bash
-docker compose -p devflow-prod --env-file .env.prod \
+docker compose -p devshare-prod --env-file .env.prod \
   -f docker-compose.yml -f docker-compose.prod.yml \
-  exec -T postgres pg_dump -U devflow devflow | gzip > pg-backup-$(date +%F).sql.gz
+  exec -T postgres pg_dump -U devshare devshare | gzip > pg-backup-$(date +%F).sql.gz
 ```
 
 ## 6. HTTPS
 
 ```bash
 # 域名解析到 ECS 后，为站点申请证书
-docker compose -p devflow-prod --env-file .env.prod \
+docker compose -p devshare-prod --env-file .env.prod \
   -f docker-compose.yml -f docker-compose.prod.yml \
   run --rm certbot certonly --webroot -w /var/www/certbot \
   -d www.example.com -d example.com
@@ -133,13 +133,13 @@ docker compose -p devflow-prod --env-file .env.prod \
 签发成功后，打开 `deploy/nginx.conf` 中的 443 server 块（填写域名与证书路径）并重启 nginx：
 
 ```bash
-docker compose -p devflow-prod --env-file .env.prod \
+docker compose -p devshare-prod --env-file .env.prod \
   -f docker-compose.yml -f docker-compose.prod.yml restart nginx
 ```
 
 ## 7. OSS + CDN（图片加速）
 
-1. 开通 OSS，创建 Bucket（如 `devflow-assets`，私有读写）。
+1. 开通 OSS，创建 Bucket（如 `devshare-assets`，私有读写）。
 2. 创建 RAM 子账号，授权 Bucket 的 `PutObject`，拿到 AccessKey。
 3. 在 `.env.staging` / `.env.prod` 填入 `OSS_*`，`OSS_PUBLIC_URL` 指向 CDN 加速域名（如 `https://cdn.example.com`）。
 4. 阿里云 CDN：添加加速域名 `cdn.example.com` → 源站类型"OSS 域名"。
@@ -155,11 +155,11 @@ docker compose -p devflow-prod --env-file .env.prod \
 ## 9. 更新与维护
 
 ```bash
-cd /srv/devflow
+cd /srv/devshare
 # 日常更新由 CI 自动完成（push dev/main）；服务器上只需查看状态：
-docker compose -p devflow-staging --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml ps
-docker compose -p devflow-prod    --env-file .env.prod    -f docker-compose.yml -f docker-compose.prod.yml    ps
-docker compose -p devflow-prod logs -f --tail=100 api web
+docker compose -p devshare-staging --env-file .env.staging -f docker-compose.yml -f docker-compose.staging.yml ps
+docker compose -p devshare-prod    --env-file .env.prod    -f docker-compose.yml -f docker-compose.prod.yml    ps
+docker compose -p devshare-prod logs -f --tail=100 api web
 ```
 
 ## 10. 常见问题

@@ -1,7 +1,7 @@
 export const BRAND = {
-  name: 'DevFlow',
-  sloganZh: '技术内容社区',
-  sloganEn: 'Developer Content Community',
+  name: 'DevShare（技享）',
+  sloganZh: '开发者技术分享社区',
+  sloganEn: 'Developer Tech Sharing Community',
   primary: '#2F6BFF',
   accent: '#00C2A8',
   bg: '#F7F8FA',

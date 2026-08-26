@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ArticleListItem, Paginated } from '@devflow/shared'
+import type { ArticleListItem, Paginated } from '@devshare/shared'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -42,7 +42,7 @@ async function loadMore() {
 
 watch(slug, fetchFirst, { immediate: true })
 
-useHead({ title: `${t('home.tagNav')} - DevFlow` })
+useHead({ title: `${t('home.tagNav')} - DevShare` })
 </script>
 
 <template>

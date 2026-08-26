@@ -1,6 +1,6 @@
 import type { User } from '@prisma/client'
-import type { Locale, UserProfile } from '@devflow/shared'
-import { isLocale } from '@devflow/shared'
+import type { Locale, UserProfile } from '@devshare/shared'
+import { isLocale } from '@devshare/shared'
 
 export async function toUserProfile(
   user: Pick<User, 'id' | 'username' | 'avatar' | 'bio' | 'role' | 'locale' | 'createdAt'>,
