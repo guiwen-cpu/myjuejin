@@ -19,7 +19,7 @@ name: CI/CD
 
 # 触发条件：哪些事件会启动这个流水线
 on:
-  pull_request:            # 有 PR 时（含 PR 后续更新）
+  pull_request:            # 有 PR 时（含 PR 后续更新）1
   push:                    # 有 push 时
     branches: [dev, main]  # 只监听 dev 和 main 两个分支
 
