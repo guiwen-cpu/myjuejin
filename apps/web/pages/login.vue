@@ -26,7 +26,7 @@ async function submit() {
   }
 }
 
-useHead({ title: `${t('auth.loginTitle')} - DevFlow` })
+useHead({ title: `${t('auth.loginTitle')} - DevShare` })
 </script>
 
 <template>

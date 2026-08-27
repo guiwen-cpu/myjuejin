@@ -11,7 +11,7 @@ import {
   type ArticleListItem,
   type Paginated,
   type SortOrder,
-} from '@devflow/shared'
+} from '@devshare/shared'
 import { PrismaService } from '../prisma/prisma.service'
 import { RedisService } from '../redis/redis.service'
 import type { AuthenticatedUser } from '../common/decorators/current-user.decorator'

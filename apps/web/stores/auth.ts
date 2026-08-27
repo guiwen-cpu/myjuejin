@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { ApiErrorBody, UserProfile } from '@devflow/shared'
+import type { ApiErrorBody, UserProfile } from '@devshare/shared'
 
 interface AuthPayload {
   accessToken: string

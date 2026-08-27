@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import type { TagDTO } from '@devflow/shared'
+import type { TagDTO } from '@devshare/shared'
 import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()

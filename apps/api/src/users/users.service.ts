@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import { ErrorCodes, type ArticleListItem, type Paginated, type UserProfile } from '@devflow/shared'
+import { ErrorCodes, type ArticleListItem, type Paginated, type UserProfile } from '@devshare/shared'
 import { PrismaService } from '../prisma/prisma.service'
 import { toUserProfile } from './user.mapper'
 import { UpdateProfileDto } from './dto/update-profile.dto'

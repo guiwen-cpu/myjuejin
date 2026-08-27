@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ArticleListItem, Paginated, RankItem, TagDTO } from '@devflow/shared'
+import type { ArticleListItem, Paginated, RankItem, TagDTO } from '@devshare/shared'
 
 const { t } = useI18n()
 const api = useApi()
@@ -53,7 +53,7 @@ async function loadMore() {
 }
 
 useHead({
-  title: 'DevFlow',
+  title: 'DevShare（技享）',
   meta: [
     {
       name: 'description',

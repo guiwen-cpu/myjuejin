@@ -1,8 +1,8 @@
 {
-  "name": "@devflow/api",
+  "name": "@devshare/api",
   "version": "0.1.0",
   "private": true,
-  "description": "DevFlow API - NestJS + Prisma + PostgreSQL + Redis + Meilisearch",
+  "description": "DevShare API - NestJS + Prisma + PostgreSQL + Redis + Meilisearch",
   "scripts": {
     "build": "nest build",
     "start": "nest start",
@@ -19,7 +19,7 @@
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
-    "@devflow/shared": "workspace:*",
+    "@devshare/shared": "workspace:*",
     "@nestjs/common": "^11.1.3",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.3",

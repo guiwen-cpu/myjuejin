@@ -74,8 +74,8 @@
     "username": "Username",
     "email": "Email",
     "password": "Password",
-    "loginTitle": "Sign in to DevFlow",
-    "registerTitle": "Join DevFlow",
+    "loginTitle": "Sign in to DevShare",
+    "registerTitle": "Join DevShare",
     "loginBtn": "Sign in",
     "registerBtn": "Sign up",
     "noAccount": "No account?",
@@ -121,7 +121,7 @@
     "VALIDATION_FAILED": "Please check your input"
   },
   "footer": {
-    "desc": "DevFlow — a developer content community to share and grow",
+    "desc": "DevShare — developer tech sharing community",
     "links": "Links",
     "icp": "ICP 00000000"
   },

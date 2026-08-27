@@ -36,7 +36,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TransformInterceptor())
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('DevFlow API')
+    .setTitle('DevShare API')
     .setDescription('类掘金技术社区后端 API（NestJS + Prisma + PostgreSQL + Redis + Meilisearch）')
     .setVersion('0.1.0')
     .addBearerAuth()
@@ -45,7 +45,7 @@ async function bootstrap() {
 
   const port = Number(config.get<string>('PORT') ?? 3000)
   await app.listen(port, '0.0.0.0')
-  console.log(`DevFlow API listening on http://0.0.0.0:${port}`)
+  console.log(`DevShare API listening on http://0.0.0.0:${port}`)
 }
 
 bootstrap()

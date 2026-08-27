@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { UserProfile } from '@devflow/shared'
+import type { UserProfile } from '@devshare/shared'
 import { useAuthStore } from '~/stores/auth'
 
 const { t, setLocale } = useI18n()

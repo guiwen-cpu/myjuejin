@@ -8,7 +8,7 @@
 //     验证"路由 → 控制器 → 服务 → 数据库"整条链路是通的。
 //
 // 运行方式（需要 PostgreSQL 容器在跑、且已执行过 prisma migrate）：
-//   pnpm --filter @devflow/api test:e2e
+//   pnpm --filter @devshare/api test:e2e
 // =====================================================================
 
 import { INestApplication, ValidationPipe } from '@nestjs/common'

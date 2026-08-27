@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common'
 import { Response } from 'express'
-import { ErrorCodes, type ApiErrorBody } from '@devflow/shared'
+import { ErrorCodes, type ApiErrorBody } from '@devshare/shared'
 
 function codeForStatus(status: number): string {
   switch (status) {

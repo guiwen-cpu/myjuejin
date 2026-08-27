@@ -1,4 +1,5 @@
 node_modules/
+.pnpm-store/
 dist/
 .nuxt/
 .output/
@@ -7,6 +8,8 @@ coverage/
 .env
 .env.*
 !.env.example
+!.env.staging.example
+!.env.prod.example
 uploads/
 *.log
 .DS_Store

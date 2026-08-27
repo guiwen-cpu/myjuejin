@@ -1,4 +1,4 @@
-# DevFlow 类掘金技术社区（monorepo）
+# DevShare（技享）开发者技术分享社区（monorepo）
 
 从 0 到 1 实现的技术内容社区：Vue 3 + Nuxt 4（SSR）+ NestJS + PostgreSQL + Redis + Meilisearch，Docker 容器化部署，面向国内云 + CDN 上线。22
 
@@ -51,8 +51,8 @@ docker compose up -d postgres redis meilisearch
 docker compose ps   # 三个服务都应为 running
 
 # 4. 初始化数据库
-pnpm --filter @devflow/api prisma:migrate
-pnpm --filter @devflow/api prisma:seed
+pnpm --filter @devshare/api prisma:migrate
+pnpm --filter @devshare/api prisma:seed
 
 # 5. 同时启动前后端（web: 3000 / api: 3001）
 pnpm dev

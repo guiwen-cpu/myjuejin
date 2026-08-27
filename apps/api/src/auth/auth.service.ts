@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import bcrypt from 'bcryptjs'
 import { randomBytes } from 'node:crypto'
-import { ErrorCodes, type AuthResult, type UserProfile } from '@devflow/shared'
+import { ErrorCodes, type AuthResult, type UserProfile } from '@devshare/shared'
 import { PrismaService } from '../prisma/prisma.service'
 import { RedisService } from '../redis/redis.service'
 import { LoginDto } from './dto/login.dto'
@@ -77,7 +77,7 @@ export class AuthService {
     const accessToken = await this.jwt.signAsync(
       { sub: user.id, email: user.email, username: user.username, role: user.role },
       {
-        secret: this.config.get<string>('JWT_ACCESS_SECRET') ?? 'devflow-access-secret-change-me',
+        secret: this.config.get<string>('JWT_ACCESS_SECRET') ?? 'devshare-access-secret-change-me',
         expiresIn: Number(this.config.get<string>('ACCESS_TOKEN_TTL_SECONDS') ?? 1800),
       },
     )

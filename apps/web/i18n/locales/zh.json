@@ -74,8 +74,8 @@
     "username": "用户名",
     "email": "邮箱",
     "password": "密码",
-    "loginTitle": "登录 DevFlow",
-    "registerTitle": "注册 DevFlow",
+    "loginTitle": "登录 DevShare",
+    "registerTitle": "注册 DevShare",
     "loginBtn": "登录",
     "registerBtn": "注册",
     "noAccount": "还没有账号？",
@@ -121,7 +121,7 @@
     "VALIDATION_FAILED": "提交内容有误，请检查"
   },
   "footer": {
-    "desc": "DevFlow —— 记录、分享、成长的技术内容社区",
+    "desc": "DevShare（技享）—— 开发者技术分享社区",
     "links": "友情链接",
     "icp": "京ICP备00000000号"
   },

@@ -12,6 +12,6 @@ module.exports = {
   moduleNameMapper: {
     // 直接映射到 shared 的 TS 源码，由 ts-jest 编译，
     // 不再依赖 dist 产物格式（ESM/CJS 均可）
-    '^@devflow/shared$': '<rootDir>/../../../packages/shared/src/index.ts',
+    '^@devshare/shared$': '<rootDir>/../../../packages/shared/src/index.ts',
   },
 }

@@ -1,5 +1,5 @@
 # =====================================================================
-# DevFlow 前端镜像（Nuxt 4 SSR）
+# DevShare 前端镜像（Nuxt 4 SSR）
 # ---------------------------------------------------------------------
 # 什么是 Dockerfile：一份"镜像制作说明书"。docker build 会从上到下
 # 逐行执行，每一步生成一层，最终产出一个可以到处运行的镜像。
@@ -54,10 +54,10 @@ COPY apps/web/package.json apps/web/
 # 安装依赖。关键参数：
 #   --frozen-lockfile  严格按照锁文件安装，锁文件不一致就直接报错。
 #                      好处：任何人/任何机器构建出来的依赖完全一致。
-#   --filter @devflow/web...   只安装 web 及它依赖的 workspace 包，
+#   --filter @devshare/web...   只安装 web 及它依赖的 workspace 包，
 #                      带 ... 表示"连同它依赖的 workspace 兄弟一起装"。
-#   --filter @devflow/shared   显式把 shared 也带上。
-RUN pnpm install --frozen-lockfile --filter @devflow/web... --filter @devflow/shared
+#   --filter @devshare/shared   显式把 shared 也带上。
+RUN pnpm install --frozen-lockfile --filter @devshare/web... --filter @devshare/shared
 
 # ---------------------------- 阶段 3：build ----------------------------
 # 目的：拿到完整源码，编译出生产产物（.output）。
@@ -80,8 +80,11 @@ ENV NODE_ENV=production
 
 # 先编译共享类型包（web 依赖它的 dist 产物），再编译 Nuxt 前端。
 # 编译结果会输出到 apps/web/.output。
-RUN pnpm --filter @devflow/shared build
-RUN pnpm --filter @devflow/web build
+# 当前环境的站点 URL 通过构建参数注入（Nuxt public config 会内联到客户端包）。
+ARG NUXT_PUBLIC_SITE_URL
+ENV NUXT_PUBLIC_SITE_URL=$NUXT_PUBLIC_SITE_URL
+RUN pnpm --filter @devshare/shared build
+RUN pnpm --filter @devshare/web build
 
 # ---------------------------- 阶段 4：runtime --------------------------
 # 目的：最终镜像。只保留运行所需的最小文件，不含源码和 node_modules。
@@ -94,7 +97,7 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 
 # 容器内工作目录
-WORKDIR /app
+# WORKDIR /app
 
 # 把阶段 3 编译出的 .output（Nuxt 的完整运行包：服务端代码 + 静态资源）
 # 拷进最终镜像。这是最终镜像里唯一的"业务文件"。

@@ -7,6 +7,6 @@
     "^.+\\.ts$": ["ts-jest", { "tsconfig": "<rootDir>/../tsconfig.json" }]
   },
   "moduleNameMapper": {
-    "^@devflow/shared$": "<rootDir>/../../../packages/shared/src/index.ts"
+    "^@devshare/shared$": "<rootDir>/../../../packages/shared/src/index.ts"
   }
 }

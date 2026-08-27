@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Flame } from 'lucide-vue-next'
-import type { RankItem } from '@devflow/shared'
+import type { RankItem } from '@devshare/shared'
 import { formatCount } from '~/utils/format'
 
 defineProps<{ items: RankItem[] }>()

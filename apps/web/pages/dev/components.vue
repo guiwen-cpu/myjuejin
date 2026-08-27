@@ -60,7 +60,7 @@ const input = ref('')
           <button class="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 rounded-md">Item 2</button>
         </BaseDropdown>
         <BaseButton variant="secondary" @click="modalOpen = true">Open Modal</BaseButton>
-        <BaseButton variant="secondary" @click="toast.success('Hello DevFlow!')">Toast</BaseButton>
+        <BaseButton variant="secondary" @click="toast.success('Hello DevShare!')">Toast</BaseButton>
       </div>
       <BaseModal v-model="modalOpen" title="Modal Title">
         <p class="text-sm text-slate-600">This is a hand-crafted modal built with Tailwind CSS.</p>
