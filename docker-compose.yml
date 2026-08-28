@@ -154,7 +154,7 @@ services:
     networks: [devshare]
 
   nginx:
-    image: nginx:1.27-alpine
+    image: nginx:stable-alpine
     restart: unless-stopped
     ports:
       # 80 = HTTP 入口，443 = HTTPS 入口（配好证书后启用）
