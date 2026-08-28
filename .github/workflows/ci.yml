@@ -162,7 +162,7 @@ jobs:
 
       # 把服务器的 SSH 私钥注入 runner，后面的 ssh 命令才能免密登录服务器
       - name: Load SSH key
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
 
@@ -195,7 +195,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Load SSH key
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
 
