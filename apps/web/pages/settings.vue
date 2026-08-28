@@ -77,8 +77,8 @@ async function save() {
         v-model="form.locale"
         :label="t('nav.language')"
         :options="[
-          { value: 'zh', label: t('nav.zh') },
-          { value: 'en', label: t('nav.en') },
+          { value: 'zh', label: '中文' },
+          { value: 'en', label: 'English' },
         ]"
       />
       <BaseButton :loading="saving" @click="save">

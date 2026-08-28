@@ -137,8 +137,10 @@ services:
       HOST: 0.0.0.0
       # 容器内部端口（对外映射由 nginx 负责）
       PORT: 3000
-      # 服务端直连 API：用服务名 api 当域名，走内网不走公网
-      API_INTERNAL_URL: http://api:3000/api/v1
+      # 服务端直连 API：用服务名 api 当域名，走内网不走公网。
+      # 必须是 NUXT_API_BASE（Nuxt 运行时用它覆盖 runtimeConfig.apiBase），
+      # 不能叫 API_INTERNAL_URL，否则 Nuxt 不认、覆盖不生效。
+      NUXT_API_BASE: http://api:3000/api/v1
       # 站点对外 URL，Nuxt 生成 SEO/规范链接用；默认本地地址，服务器上由 .env 覆盖
       NUXT_PUBLIC_SITE_URL: ${NUXT_PUBLIC_SITE_URL:-http://localhost:3000}
     depends_on:

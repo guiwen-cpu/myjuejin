@@ -58,4 +58,5 @@ services:
       NUXT_PUBLIC_SITE_URL: ${NUXT_PUBLIC_SITE_URL}
       # 服务端直连 API：web 和 api 在同一个 Compose 网络里，
       # 用服务名 api + 容器端口 3000 访问，走内网不走公网。
-      API_INTERNAL_URL: http://api:3000/api/v1
+      # 变量名必须是 NUXT_API_BASE（Nuxt 运行时覆盖 runtimeConfig.apiBase）。
+      NUXT_API_BASE: http://api:3000/api/v1

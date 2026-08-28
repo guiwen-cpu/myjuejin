@@ -14,7 +14,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // 服务端直连 API（容器内网 / 本地 dev 地址），需要带上 /api/v1 全局前缀。
     // 用 127.0.0.1 而非 localhost，避免 Windows 下 localhost 优先解析到 IPv6 ::1。
-    apiBase: process.env.API_INTERNAL_URL || 'http://127.0.0.1:3001/api/v1',
+    // 这里只写本地默认值；Docker 部署时由 compose 注入的 NUXT_API_BASE 在运行时覆盖。
+    apiBase: 'http://127.0.0.1:3001/api/v1',
     public: {
       // 浏览器侧走同源代理（nginx / nitro devProxy）
       apiBase: '/api/v1',
