@@ -18,7 +18,7 @@ COPY . .
 RUN pnpm --filter @devshare/shared build
 RUN pnpm --filter @devshare/api exec prisma generate
 RUN pnpm --filter @devshare/api build
-RUN pnpm --filter @devshare/api deploy --prod /app/prod
+RUN pnpm --filter @devshare/api deploy --prod --legacy /app/prod
 
 FROM base AS runtime
 ENV NODE_ENV=production
