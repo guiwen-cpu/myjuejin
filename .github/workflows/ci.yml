@@ -36,13 +36,13 @@ jobs:
     runs-on: ubuntu-latest   # 跑在 GitHub 提供的 Ubuntu 云机器上
     steps:
       - name: Checkout
-        uses: actions/checkout@v4   # 把仓库代码下载到这台云机器上
+        uses: actions/checkout@v5   # 把仓库代码下载到这台云机器上
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4  # 安装 pnpm（版本自动读 package.json 的 packageManager）
+        uses: pnpm/action-setup@v6  # 安装 pnpm（版本自动读 package.json 的 packageManager）
 
       - name: Setup Node
-        uses: actions/setup-node@v4  # 安装 Node.js 22，并用 pnpm 缓存依赖加速
+        uses: actions/setup-node@v5  # 安装 Node.js 22，并用 pnpm 缓存依赖加速
         with:
           node-version: 22
           cache: pnpm
@@ -71,7 +71,7 @@ jobs:
       commit: ${{ steps.target.outputs.commit }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # 判断这次 push 到的是哪个分支，决定部署到哪个环境。
       # GitHub 表达式的语法是 ${{ }}；结果写进"步骤输出"（$GITHUB_OUTPUT）
@@ -154,7 +154,7 @@ jobs:
     environment: staging
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # 把服务器的 SSH 私钥注入 runner，后面的 ssh 命令才能免密登录服务器
       - name: Load SSH key
@@ -188,7 +188,7 @@ jobs:
     environment: prod
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Load SSH key
         uses: webfactory/ssh-agent@v0.9.0
