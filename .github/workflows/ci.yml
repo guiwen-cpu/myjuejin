@@ -122,6 +122,8 @@ jobs:
           context: .                          # 构建上下文 = 仓库根目录
           file: apps/web/Dockerfile           # 用哪个 Dockerfile
           push: true                          # 构建完推送到镜像仓库
+          provenance: false
+          sbom: false
           tags: |
             ${{ secrets.ACR_REGISTRY }}/devshare-web:${{ steps.target.outputs.env }}-${{ steps.target.outputs.sha }}
             ${{ secrets.ACR_REGISTRY }}/devshare-web:${{ steps.target.outputs.env }}-latest
@@ -137,6 +139,8 @@ jobs:
           context: .
           file: apps/api/Dockerfile
           push: true
+          provenance: false
+          sbom: false
           tags: |
             ${{ secrets.ACR_REGISTRY }}/devshare-api:${{ steps.target.outputs.env }}-${{ steps.target.outputs.sha }}
             ${{ secrets.ACR_REGISTRY }}/devshare-api:${{ steps.target.outputs.env }}-latest
