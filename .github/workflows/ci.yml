@@ -117,7 +117,7 @@ jobs:
       # build-args 把站点 URL 传进 Dockerfile（构建期写入前端包）
       # cache-from/to 把构建缓存存进 ACR，下次构建更快
       - name: Build & push web
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .                          # 构建上下文 = 仓库根目录
           file: apps/web/Dockerfile           # 用哪个 Dockerfile
@@ -132,7 +132,7 @@ jobs:
 
       # 构建后端 api 镜像并推送（同样打两个标签，没有构建参数）
       - name: Build & push api
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/api/Dockerfile

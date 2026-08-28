@@ -7,7 +7,8 @@ FROM base AS deps
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc ./
 COPY packages/shared/package.json packages/shared/
 COPY apps/api/package.json apps/api/
-RUN pnpm install --frozen-lockfile --filter @devshare/api... --filter @devshare/shared
+COPY apps/web/package.json apps/web/
+RUN pnpm install --frozen-lockfile --ignore-scripts --filter @devshare/api... --filter @devshare/shared
 
 FROM base AS build
 COPY --from=deps /app/node_modules /app/node_modules

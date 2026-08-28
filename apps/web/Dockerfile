@@ -50,6 +50,7 @@ COPY pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc ./
 # 好让它解析 workspace 依赖关系。
 COPY packages/shared/package.json packages/shared/
 COPY apps/web/package.json apps/web/
+COPY apps/api/package.json apps/api/
 
 # 安装依赖。关键参数：
 #   --frozen-lockfile  严格按照锁文件安装，锁文件不一致就直接报错。
@@ -57,7 +58,7 @@ COPY apps/web/package.json apps/web/
 #   --filter @devshare/web...   只安装 web 及它依赖的 workspace 包，
 #                      带 ... 表示"连同它依赖的 workspace 兄弟一起装"。
 #   --filter @devshare/shared   显式把 shared 也带上。
-RUN pnpm install --frozen-lockfile --filter @devshare/web... --filter @devshare/shared
+RUN pnpm install --frozen-lockfile --ignore-scripts --filter @devshare/web... --filter @devshare/shared
 
 # ---------------------------- 阶段 3：build ----------------------------
 # 目的：拿到完整源码，编译出生产产物（.output）。
