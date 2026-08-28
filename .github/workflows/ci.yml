@@ -115,7 +115,7 @@ jobs:
       # 构建前端 web 镜像并推送。
       # tags 打两个标签：staging-<sha>（本次精确版本，部署/回滚用）+ staging-latest（最新版）
       # build-args 把站点 URL 传进 Dockerfile（构建期写入前端包）
-      # cache-from/to 把构建缓存存进 ACR，下次构建更快
+      # cache-from/to 用 GitHub Actions 缓存，避免 ACR 不支持 buildkit 缓存清单
       - name: Build & push web
         uses: docker/build-push-action@v7
         with:
@@ -129,8 +129,8 @@ jobs:
             ${{ secrets.ACR_REGISTRY }}/devshare-web:${{ steps.target.outputs.env }}-latest
           build-args: |
             NUXT_PUBLIC_SITE_URL=${{ steps.target.outputs.site_url }}
-          cache-from: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devshare-web:buildcache,image-manifest=true
-          cache-to: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devshare-web:buildcache,mode=max,image-manifest=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # 构建后端 api 镜像并推送（同样打两个标签，没有构建参数）
       - name: Build & push api
@@ -144,8 +144,8 @@ jobs:
           tags: |
             ${{ secrets.ACR_REGISTRY }}/devshare-api:${{ steps.target.outputs.env }}-${{ steps.target.outputs.sha }}
             ${{ secrets.ACR_REGISTRY }}/devshare-api:${{ steps.target.outputs.env }}-latest
-          cache-from: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devshare-api:buildcache,image-manifest=true
-          cache-to: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devshare-api:buildcache,mode=max,image-manifest=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   # ---------------- 任务 3a：部署 staging ----------------
   # push 到 dev 才跑，不需要审批。
