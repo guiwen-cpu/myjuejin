@@ -112,12 +112,24 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      # 把 meilisearch 官方镜像推到 ACR，服务器直接从 ACR 拉取，避免 Docker Hub 404
-      - name: Mirror meilisearch to ACR
+      # 把服务器依赖的公共镜像（postgres/redis/nginx/meilisearch）推到 ACR，
+      # 部署时统一从 ACR 拉取，绕开 Docker Hub 拉取 404/超时。
+      - name: Mirror infra images to ACR
         run: |
-          docker pull getmeili/meilisearch:v1.12.0
-          docker tag getmeili/meilisearch:v1.12.0 ${{ secrets.ACR_REGISTRY }}/devshare-meilisearch:v1.12.0
-          docker push ${{ secrets.ACR_REGISTRY }}/devshare-meilisearch:v1.12.0
+          set -euo pipefail
+          images=(
+            "postgres:16-alpine|devshare-postgres|16-alpine"
+            "redis:7-alpine|devshare-redis|7-alpine"
+            "nginx:stable-alpine|devshare-nginx|stable-alpine"
+            "getmeili/meilisearch:v1.12.0|devshare-meilisearch|v1.12.0"
+          )
+          for entry in "${images[@]}"; do
+            IFS='|' read -r src repo tag <<< "$entry"
+            dst="${{ secrets.ACR_REGISTRY }}/${repo}:${tag}"
+            docker pull "$src"
+            docker tag "$src" "$dst"
+            docker push "$dst"
+          done
       # 构建前端 web 镜像并推送。
       # tags 打两个标签：staging-<sha>（本次精确版本，部署/回滚用）+ staging-latest（最新版）
       # build-args 把站点 URL 传进 Dockerfile（构建期写入前端包）

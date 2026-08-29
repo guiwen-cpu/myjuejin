@@ -23,7 +23,13 @@
 #   两套环境的数据库、上传文件等数据完全隔离，互不干扰。
 # =====================================================================
 services:
-  # ---------- Meilisearch：使用 ACR 镜像，避免服务器拉取 Docker Hub 404 ----------
+  # ---------- 基础设施镜像：统一走 ACR，避免服务器直连 Docker Hub 404 ----------
+  postgres:
+    image: ${ACR_REGISTRY}/devshare-postgres:16-alpine
+  redis:
+    image: ${ACR_REGISTRY}/devshare-redis:7-alpine
+  nginx:
+    image: ${ACR_REGISTRY}/devshare-nginx:stable-alpine
   meilisearch:
     image: ${ACR_REGISTRY}/devshare-meilisearch:v1.12.0
   # ---------- 后端 API（只覆盖镜像和环境变量，其余继承主文件）----------
