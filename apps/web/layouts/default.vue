@@ -8,5 +8,3 @@
     <BaseToast />
   </div>
 </template>
-docker login --username=aliyun@063574181 crpi-uo2gx7e52udrmw75.cn-guangzhou.personal.cr.aliyuncs.com
-docker login --username=aliyun0063574181 crpi-uo2gx7e52udrmw75.cn-guangzhou.personal.cr.aliyuncs.com
