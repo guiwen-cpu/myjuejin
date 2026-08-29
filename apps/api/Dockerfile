@@ -24,6 +24,10 @@ FROM base AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /app/prod /app
+# pnpm deploy 不会把私有 workspace 包 @devshare/shared 带入产物，这里显式拷贝
+RUN rm -rf /app/node_modules/@devshare/shared
+COPY --from=build /app/packages/shared/package.json /app/node_modules/@devshare/shared/package.json
+COPY --from=build /app/packages/shared/dist /app/node_modules/@devshare/shared/dist
 COPY --from=build /app/apps/api/prisma /app/prisma
 EXPOSE 3000
 CMD ["node", "dist/main.js"]
