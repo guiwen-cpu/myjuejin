@@ -22,7 +22,7 @@
 # =====================================================================
 services:
   postgres:
-    image: postgres:16-alpine3.21
+    image: postgres:16-alpine
     restart: unless-stopped
     environment:
       # 数据库账号/密码/库名：来自根目录 .env（本地）或 .env.staging/.env.prod（服务器）
