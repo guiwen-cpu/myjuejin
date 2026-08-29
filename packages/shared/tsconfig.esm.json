@@ -1,0 +1,10 @@
+{
+  // 继承基础配置 tsconfig.json（CommonJS 那套），只覆盖下面几项，改成产出 ESM
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",             // 改成 ESNext，编译出真正的 ES Module 语法
+    "moduleResolution": "Bundler",  // 按打包器（Vite 等）的解析规则，兼容 import/export 语法
+    "outDir": "dist/esm",           // 输出到独立的 dist/esm 目录，与 CJS 产物分开
+    "declaration": false            // .d.ts 已在 CJS 编译时生成，这里不重复生成
+  }
+}
