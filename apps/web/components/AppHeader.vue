@@ -85,14 +85,14 @@ async function onLogout() {
             :class="{ 'text-brand-600 font-medium': locale === 'zh' }"
             @click="setLocale('zh')"
           >
-            {{ t('nav.zh') }}
+            中文
           </button>
           <button
             class="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 rounded-md"
             :class="{ 'text-brand-600 font-medium': locale === 'en' }"
             @click="setLocale('en')"
           >
-            {{ t('nav.en') }}
+            English
           </button>
         </template>
       </BaseDropdown>

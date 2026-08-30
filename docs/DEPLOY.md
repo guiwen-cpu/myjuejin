@@ -55,6 +55,15 @@ sudo systemctl enable --now docker
 
 - Secrets：同上（`SERVER_*` 可各自不同）
 
+另外在仓库 **Settings → Secrets and variables → Actions → Secrets** 配置**仓库级 Secrets**：
+
+- `ACR_REGISTRY`：`registry.cn-<region>.aliyuncs.com/<namespace>`
+- `ACR_USERNAME` / `ACR_PASSWORD`：ACR 访问凭证
+
+> 注意：`build-push` 任务没有绑定 environment，`${{ secrets.XXX }}` 只能读到仓库级 Secrets。
+> 如果只把 `ACR_*` 配在 `staging`/`prod` 环境里，`docker/login-action` 会因拿不到用户名/密码而报
+> `Username and password required`。因此 `ACR_*` **必须**是仓库级 Secrets。
+
 另外在仓库 **Settings → Secrets and variables → Actions → Variables** 配置两个**仓库级变量**：
 
 - `NUXT_PUBLIC_SITE_URL_STAGING`：`http://<服务器IP>:8080`

@@ -11,6 +11,8 @@ coverage/
 !.env.staging.example
 !.env.prod.example
 uploads/
+!apps/api/src/uploads/
+!apps/api/src/uploads/**
 *.log
 .DS_Store
 .idea/

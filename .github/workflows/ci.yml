@@ -36,13 +36,13 @@ jobs:
     runs-on: ubuntu-latest   # 跑在 GitHub 提供的 Ubuntu 云机器上
     steps:
       - name: Checkout
-        uses: actions/checkout@v4   # 把仓库代码下载到这台云机器上
+        uses: actions/checkout@v5   # 把仓库代码下载到这台云机器上
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4  # 安装 pnpm（版本自动读 package.json 的 packageManager）
+        uses: pnpm/action-setup@v6  # 安装 pnpm（版本自动读 package.json 的 packageManager）
 
       - name: Setup Node
-        uses: actions/setup-node@v4  # 安装 Node.js 22，并用 pnpm 缓存依赖加速
+        uses: actions/setup-node@v5  # 安装 Node.js 22，并用 pnpm 缓存依赖加速
         with:
           node-version: 22
           cache: pnpm
@@ -71,7 +71,7 @@ jobs:
       commit: ${{ steps.target.outputs.commit }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # 判断这次 push 到的是哪个分支，决定部署到哪个环境。
       # GitHub 表达式的语法是 ${{ }}；结果写进"步骤输出"（$GITHUB_OUTPUT）
@@ -103,45 +103,67 @@ jobs:
           fi
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3   # 启用 Buildx（带缓存的镜像构建）
+        uses: docker/setup-buildx-action@v4   # 启用 Buildx（带缓存的镜像构建）
 
       - name: Login to ACR
-        uses: docker/login-action@v3          # 登录阿里云镜像仓库，之后才能 push
+        uses: docker/login-action@v4          # 登录阿里云镜像仓库，之后才能 push
         with:
           registry: ${{ steps.acr.outputs.host }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
+      # 把服务器依赖的公共镜像（postgres/redis/nginx/meilisearch）推到 ACR，
+      # 部署时统一从 ACR 拉取，绕开 Docker Hub 拉取 404/超时。
+      - name: Mirror infra images to ACR
+        run: |
+          set -euo pipefail
+          images=(
+            "postgres:16-alpine|devshare-postgres|16-alpine"
+            "redis:7-alpine|devshare-redis|7-alpine"
+            "nginx:stable-alpine|devshare-nginx|stable-alpine"
+            "getmeili/meilisearch:v1.12.0|devshare-meilisearch|v1.12.0"
+          )
+          for entry in "${images[@]}"; do
+            IFS='|' read -r src repo tag <<< "$entry"
+            dst="${{ secrets.ACR_REGISTRY }}/${repo}:${tag}"
+            docker pull "$src"
+            docker tag "$src" "$dst"
+            docker push "$dst"
+          done
       # 构建前端 web 镜像并推送。
       # tags 打两个标签：staging-<sha>（本次精确版本，部署/回滚用）+ staging-latest（最新版）
       # build-args 把站点 URL 传进 Dockerfile（构建期写入前端包）
-      # cache-from/to 把构建缓存存进 ACR，下次构建更快
+      # cache-from/to 用 GitHub Actions 缓存，避免 ACR 不支持 buildkit 缓存清单
       - name: Build & push web
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .                          # 构建上下文 = 仓库根目录
           file: apps/web/Dockerfile           # 用哪个 Dockerfile
           push: true                          # 构建完推送到镜像仓库
+          provenance: false
+          sbom: false
           tags: |
             ${{ secrets.ACR_REGISTRY }}/devshare-web:${{ steps.target.outputs.env }}-${{ steps.target.outputs.sha }}
             ${{ secrets.ACR_REGISTRY }}/devshare-web:${{ steps.target.outputs.env }}-latest
           build-args: |
             NUXT_PUBLIC_SITE_URL=${{ steps.target.outputs.site_url }}
-          cache-from: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devshare-web:buildcache
-          cache-to: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devshare-web:buildcache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # 构建后端 api 镜像并推送（同样打两个标签，没有构建参数）
       - name: Build & push api
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/api/Dockerfile
           push: true
+          provenance: false
+          sbom: false
           tags: |
             ${{ secrets.ACR_REGISTRY }}/devshare-api:${{ steps.target.outputs.env }}-${{ steps.target.outputs.sha }}
             ${{ secrets.ACR_REGISTRY }}/devshare-api:${{ steps.target.outputs.env }}-latest
-          cache-from: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devshare-api:buildcache
-          cache-to: type=registry,ref=${{ secrets.ACR_REGISTRY }}/devshare-api:buildcache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   # ---------------- 任务 3a：部署 staging ----------------
   # push 到 dev 才跑，不需要审批。
@@ -154,11 +176,11 @@ jobs:
     environment: staging
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # 把服务器的 SSH 私钥注入 runner，后面的 ssh 命令才能免密登录服务器
       - name: Load SSH key
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
 
@@ -188,10 +210,10 @@ jobs:
     environment: prod
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Load SSH key
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
 

@@ -2,6 +2,9 @@ packages:
   - "apps/*"
   - "packages/*"
 
+overrides:
+  vite: "^8.2.0"
+
 allowBuilds:
   "@prisma/client": true
   "@prisma/engines": true

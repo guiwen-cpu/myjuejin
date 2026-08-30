@@ -16,7 +16,7 @@ const localePath = useLocalePath()
       </div>
       <div class="flex items-center gap-4">
         <span>{{ t('footer.icp') }}</span>
-        <a href="https://github.com" target="_blank" rel="noopener" class="hover:text-brand-600">GitHub</a>
+        <a href="https://github.com/guiwen-cpu/myjuejin" target="_blank" rel="noopener" class="hover:text-brand-600">GitHub</a>
         <NuxtLink :to="localePath('/dev/components')" class="hover:text-brand-600">
           {{ t('dev.title') }}
         </NuxtLink>
