@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ArticleListItem, Paginated } from '@devshare/shared'
+import { DEFAULT_TAGS, type ArticleListItem, type Paginated } from '@devshare/shared'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -48,7 +48,7 @@ useHead({ title: `${t('home.tagNav')} - DevShare` })
 <template>
   <div class="max-w-3xl mx-auto">
     <h1 class="text-xl font-bold text-slate-900 mb-4">
-      # {{ slug }}
+      # {{ DEFAULT_TAGS.find((t) => t.slug === slug)?.name ?? slug }}
     </h1>
     <div class="bg-white rounded-xl border border-slate-200 p-4">
       <div v-if="items.length > 0">
