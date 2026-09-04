@@ -2,10 +2,12 @@
 import { DEFAULT_TAGS } from '@devshare/shared'
 import { LogOut, PenLine, Search, Settings, User } from 'lucide-vue-next'
 import { useAuthStore } from '~/stores/auth'
+import { useHydrated } from '~/composables/useHydrated'
 
 const { t, locale, setLocale } = useI18n()
 const localePath = useLocalePath()
 const auth = useAuthStore()
+const hydrated = useHydrated()
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
@@ -43,7 +45,9 @@ async function onLogout() {
         <NuxtLink
           :to="localePath('/')"
           class="px-3 py-1.5 rounded-md hover:bg-slate-100 hover:text-brand-600"
-          :class="{ 'text-brand-600 font-medium bg-brand-50': route.path === '/' || route.path === '/en' }"
+          :class="{
+            'text-brand-600 font-medium bg-brand-50': route.path === '/' || route.path === '/en',
+          }"
         >
           {{ t('nav.home') }}
         </NuxtLink>
@@ -59,7 +63,8 @@ async function onLogout() {
 
       <div class="flex-1" />
 
-      <form class="hidden sm:flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1.5 w-56 focus-within:ring-2 ring-brand-500/40"
+      <form
+        class="hidden sm:flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1.5 w-56 focus-within:ring-2 ring-brand-500/40"
         @submit.prevent="onSearch"
       >
         <Search class="w-4 h-4 text-slate-400" />
@@ -97,10 +102,15 @@ async function onLogout() {
         </template>
       </BaseDropdown>
 
-      <template v-if="auth.isLoggedIn && auth.user">
+      <template v-if="hydrated && auth.isLoggedIn && auth.user">
         <BaseDropdown align="right">
           <template #trigger>
-            <BaseAvatar :src="auth.user.avatar" :name="auth.user.username" size="sm" class="cursor-pointer" />
+            <BaseAvatar
+              :src="auth.user.avatar"
+              :name="auth.user.username"
+              size="sm"
+              class="cursor-pointer"
+            />
           </template>
           <template #default>
             <NuxtLink
@@ -125,7 +135,10 @@ async function onLogout() {
         </BaseDropdown>
       </template>
       <template v-else>
-        <NuxtLink :to="localePath('/login')" class="text-sm text-slate-600 hover:text-brand-600 px-2 py-1">
+        <NuxtLink
+          :to="localePath('/login')"
+          class="text-sm text-slate-600 hover:text-brand-600 px-2 py-1"
+        >
           {{ t('nav.login') }}
         </NuxtLink>
         <NuxtLink
@@ -137,7 +150,7 @@ async function onLogout() {
       </template>
 
       <NuxtLink
-        v-if="auth.isLoggedIn"
+        v-if="hydrated && auth.isLoggedIn"
         :to="localePath('/write')"
         class="hidden sm:inline-flex items-center gap-1 text-sm bg-accent-500 text-white px-3 py-1.5 rounded-lg hover:bg-accent-600 transition-colors"
       >

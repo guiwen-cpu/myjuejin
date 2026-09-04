@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import { Eye, Heart, MessageSquare, Star } from 'lucide-vue-next'
+import { Eye, Heart, MessageSquare } from 'lucide-vue-next'
 import type { ArticleListItem } from '@devshare/shared'
 import { formatCount, timeAgo } from '~/utils/format'
+import { useNow } from '~/composables/useNow'
 
 const props = defineProps<{ article: ArticleListItem }>()
 const { locale } = useI18n()
+const now = useNow()
 const localePath = useLocalePath()
 </script>
 
 <template>
-  <article class="bg-white rounded-xl border border-slate-200 hover:border-brand-300 hover:shadow-md transition-all p-4 h-36 flex gap-4 overflow-hidden">
+  <article
+    class="bg-white rounded-xl border border-slate-200 hover:border-brand-300 hover:shadow-md transition-all p-4 h-36 flex gap-4 overflow-hidden"
+  >
     <div class="flex-1 min-w-0 flex flex-col">
       <NuxtLink
         :to="localePath(`/article/${props.article.id}`)"
@@ -25,7 +29,11 @@ const localePath = useLocalePath()
           :to="localePath(`/user/${props.article.author.id}`)"
           class="flex items-center gap-1.5 hover:text-brand-600 min-w-0"
         >
-          <BaseAvatar :src="props.article.author.avatar" :name="props.article.author.username" size="xs" />
+          <BaseAvatar
+            :src="props.article.author.avatar"
+            :name="props.article.author.username"
+            size="xs"
+          />
           <span class="truncate">{{ props.article.author.username }}</span>
         </NuxtLink>
         <span class="flex items-center gap-1">
@@ -37,7 +45,7 @@ const localePath = useLocalePath()
         <span class="flex items-center gap-1">
           <MessageSquare class="w-3.5 h-3.5" /> {{ formatCount(props.article.commentCount) }}
         </span>
-        <span class="hidden sm:inline">{{ timeAgo(props.article.publishedAt, locale) }}</span>
+        <span class="hidden sm:inline">{{ timeAgo(props.article.publishedAt, locale, now) }}</span>
       </div>
     </div>
     <div v-if="props.article.cover" class="w-36 shrink-0">

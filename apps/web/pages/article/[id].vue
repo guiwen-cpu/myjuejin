@@ -3,6 +3,8 @@ import { Eye, Heart, MessageSquare, Send, Star } from 'lucide-vue-next'
 import type { ArticleDetail, CommentItem, Paginated } from '@devshare/shared'
 import { useAuthStore } from '~/stores/auth'
 import { formatCount, timeAgo } from '~/utils/format'
+import { useNow } from '~/composables/useNow'
+import { useHydrated } from '~/composables/useHydrated'
 
 const route = useRoute()
 const { t, locale } = useI18n()
@@ -10,16 +12,22 @@ const api = useApi()
 const auth = useAuthStore()
 const toast = useToast()
 const localePath = useLocalePath()
+const now = useNow()
+const hydrated = useHydrated()
 
 const articleId = computed(() => Number(route.params.id))
 
-const { data: article, pending, refresh } = await useAsyncData(
-  `article-${articleId.value}`,
-  () => api.get<ArticleDetail>(`/articles/${articleId.value}`),
+const {
+  data: article,
+  pending,
+  refresh,
+} = await useAsyncData(`article-${articleId.value}`, () =>
+  api.get<ArticleDetail>(`/articles/${articleId.value}`),
 )
-const { data: commentsPage } = await useAsyncData(
-  `comments-${articleId.value}`,
-  () => api.get<Paginated<CommentItem>>(`/articles/${articleId.value}/comments`, { query: { limit: 30 } }),
+const { data: commentsPage } = await useAsyncData(`comments-${articleId.value}`, () =>
+  api.get<Paginated<CommentItem>>(`/articles/${articleId.value}/comments`, {
+    query: { limit: 30 },
+  }),
 )
 
 const comments = ref<CommentItem[]>(commentsPage.value?.items ?? [])
@@ -32,11 +40,12 @@ async function toggleLike() {
     toast.info(t('errors.UNAUTHORIZED'))
     return
   }
-  const res = await api.post<{ liked: boolean; likeCount: number }>(`/articles/${articleId.value}/like`)
-  if (article.value) {
-    article.value.likedByMe = res.liked
-    article.value.likeCount = res.likeCount
-  }
+  await api.post<{ liked: boolean; likeCount: number }>(`/articles/${articleId.value}/like`)
+  // if (article.value) {
+  //   article.value.likedByMe = res.liked
+  //   article.value.likeCount = res.likeCount
+  // }
+  refresh()
 }
 
 async function toggleCollect() {
@@ -44,13 +53,14 @@ async function toggleCollect() {
     toast.info(t('errors.UNAUTHORIZED'))
     return
   }
-  const res = await api.post<{ collected: boolean; collectCount: number }>(
+  await api.post<{ collected: boolean; collectCount: number }>(
     `/articles/${articleId.value}/collect`,
   )
-  if (article.value) {
-    article.value.collectedByMe = res.collected
-    article.value.collectCount = res.collectCount
-  }
+  refresh()
+  // if (article.value) {
+  //   article.value.collectedByMe = res.collected
+  //   article.value.collectCount = res.collectCount
+  // }
 }
 
 async function toggleFollow() {
@@ -68,7 +78,9 @@ async function submitComment() {
   if (!content || !article.value) return
   submitting.value = true
   try {
-    const comment = await api.post<CommentItem>(`/articles/${articleId.value}/comments`, { content })
+    const comment = await api.post<CommentItem>(`/articles/${articleId.value}/comments`, {
+      content,
+    })
     comments.value.unshift(comment)
     commentText.value = ''
     article.value.commentCount += 1
@@ -119,7 +131,7 @@ useHead(() => ({
             {{ article.author.username }}
           </span>
         </NuxtLink>
-        <span class="text-xs text-slate-400">{{ timeAgo(article.publishedAt, locale) }}</span>
+        <span class="text-xs text-slate-400">{{ timeAgo(article.publishedAt, locale, now) }}</span>
         <span class="text-xs text-slate-400 flex items-center gap-1">
           <Eye class="w-3.5 h-3.5" /> {{ formatCount(article.viewCount) }}
         </span>
@@ -133,13 +145,12 @@ useHead(() => ({
         </BaseButton>
       </div>
 
+      <!-- contentHtml 已由后端 markdown 渲染后经 xss 白名单清洗，见 apps/api/src/articles/markdown.util.ts -->
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <div class="prose-content" v-html="article.contentHtml" />
 
       <div class="flex items-center justify-center gap-3 mt-8 pt-6 border-t border-slate-100">
-        <BaseButton
-          :variant="article.likedByMe ? 'primary' : 'secondary'"
-          @click="toggleLike"
-        >
+        <BaseButton :variant="article.likedByMe ? 'primary' : 'secondary'" @click="toggleLike">
           <Heart class="w-4 h-4" :fill="article.likedByMe ? 'currentColor' : 'none'" />
           {{ article.likedByMe ? t('article.liked') : t('article.like') }} ·
           {{ formatCount(article.likeCount) }}
@@ -161,10 +172,7 @@ useHead(() => ({
         </h2>
 
         <form class="flex gap-2 mb-6" @submit.prevent="submitComment">
-          <BaseInput
-            v-model="commentText"
-            :placeholder="t('article.commentPlaceholder')"
-          />
+          <BaseInput v-model="commentText" :placeholder="t('article.commentPlaceholder')" />
           <BaseButton type="submit" :loading="submitting" :disabled="!commentText.trim()">
             <Send class="w-4 h-4" />
           </BaseButton>
@@ -175,17 +183,17 @@ useHead(() => ({
         </div>
         <div v-else class="flex flex-col gap-4">
           <div v-for="comment in comments" :key="comment.id" class="flex gap-3">
-            <BaseAvatar
-              :src="comment.author.avatar"
-              :name="comment.author.username"
-              size="sm"
-            />
+            <BaseAvatar :src="comment.author.avatar" :name="comment.author.username" size="sm" />
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2">
-                <span class="text-sm font-medium text-slate-700">{{ comment.author.username }}</span>
-                <span class="text-xs text-slate-400">{{ timeAgo(comment.createdAt, locale) }}</span>
+                <span class="text-sm font-medium text-slate-700">{{
+                  comment.author.username
+                }}</span>
+                <span class="text-xs text-slate-400">{{
+                  timeAgo(comment.createdAt, locale, now)
+                }}</span>
                 <button
-                  v-if="auth.user?.id === comment.author.id"
+                  v-if="hydrated && auth.user?.id === comment.author.id"
                   class="ml-auto text-xs text-slate-400 hover:text-red-500"
                   @click="deleteComment(comment)"
                 >

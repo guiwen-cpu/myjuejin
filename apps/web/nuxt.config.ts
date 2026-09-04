@@ -6,6 +6,11 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/i18n', '@nuxt/eslint'],
   css: ['~/assets/css/main.css'],
   ssr: true,
+  experimental: {
+    // 关闭 payload 提取：把 useAsyncData 数据内联进 HTML，避免 SSR 渲染与
+    // _payload.json 各请求一次导致 viewCount 等动态字段不一致的 hydration 警告。
+    payloadExtraction: false,
+  },
   components: [{ path: '~/components', pathPrefix: false }],
   vite: {
     plugins: [tailwindcss()],
@@ -25,7 +30,7 @@ export default defineNuxtConfig({
 
   routeRules: {
     // SSR + SWR：首页与文章详情做服务端渲染并缓存
-    '/': { swr: 60 },
+    '/': { swr: false },
     '/article/**': { swr: 60 },
     '/en': { swr: 60 },
     '/en/article/**': { swr: 60 },
