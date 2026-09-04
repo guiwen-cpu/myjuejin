@@ -62,7 +62,7 @@ BREAKING CHANGE: 登录接口不再返回 accessToken
 
 `.husky/pre-commit` 会执行 `lint-staged`：
 
-- 对暂存的 `*.{js,ts,vue}` 先 `prettier --write`，再 `eslint --max-warnings=0`（严格校验）。
+- 对暂存的 `*.{js,ts,vue}` 先 `prettier --write`，再运行 `eslint`。仅有 `error` 级别问题会拦截提交；`warning` 只提示、不阻断（如需严格模式可改用 `--max-warnings=0`）。
 - 对 `*.{json,md,yml,yaml}` 执行 `prettier --write`。
 - 锁文件 `pnpm-lock.yaml` 已加入 `.prettierignore`，不会被格式化。
 

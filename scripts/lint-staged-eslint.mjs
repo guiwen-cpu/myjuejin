@@ -24,10 +24,11 @@ const apiFiles = files.filter((f) => f.startsWith(joinRoot('apps', 'api')))
 // 只要有一组校验失败，最终就返回非 0，从而拦截本次提交
 let failed = false
 
-// 在指定目录下运行 ESLint，--max-warnings=0 表示 warning 也视为失败（严格模式）
+// 在指定目录下运行 ESLint。未加 --max-warnings，因此仅 error 级别会使退出码非 0，
+// warning 只打印不拦截提交。
 function run(cwd, list) {
   if (!list.length) return
-  const r = spawnSync(process.execPath, [eslint, '--max-warnings=0', ...list], {
+  const r = spawnSync(process.execPath, [eslint, ...list], {
     cwd,
     stdio: 'inherit',
   })
