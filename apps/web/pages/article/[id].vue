@@ -116,33 +116,45 @@ useHead(() => ({
 
   <div v-else-if="article" class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 items-start">
     <article class="bg-white rounded-xl border border-slate-200 p-6 sm:p-8">
-      <div class="flex items-center gap-2 mb-3">
-        <BaseTag v-for="tag in article.tags" :key="tag.id" :name="tag.name" :slug="tag.slug" />
-      </div>
+      <div class="flex justify-between gap-4 pb-5 border-b border-slate-100 mb-6">
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <BaseTag v-for="tag in article.tags" :key="tag.id" :name="tag.name" :slug="tag.slug" />
+          </div>
 
-      <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 leading-snug mb-4">
-        {{ article.title }}
-      </h1>
+          <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 leading-snug mb-4">
+            {{ article.title }}
+          </h1>
 
-      <div class="flex items-center gap-3 pb-5 border-b border-slate-100 mb-6">
-        <NuxtLink :to="localePath(`/user/${article.author.id}`)" class="flex items-center gap-2">
-          <BaseAvatar :src="article.author.avatar" :name="article.author.username" size="sm" />
-          <span class="text-sm font-medium text-slate-700 hover:text-brand-600">
-            {{ article.author.username }}
-          </span>
-        </NuxtLink>
-        <span class="text-xs text-slate-400">{{ timeAgo(article.publishedAt, locale, now) }}</span>
-        <span class="text-xs text-slate-400 flex items-center gap-1">
-          <Eye class="w-3.5 h-3.5" /> {{ formatCount(article.viewCount) }}
-        </span>
-        <BaseButton
-          size="sm"
-          variant="secondary"
-          :class="{ 'text-brand-600': following }"
-          @click="toggleFollow"
-        >
-          {{ following ? t('article.following') : t('article.follow') }}
-        </BaseButton>
+          <div class="flex items-center gap-3">
+            <NuxtLink
+              :to="localePath(`/user/${article.author.id}`)"
+              class="flex items-center gap-2"
+            >
+              <BaseAvatar :src="article.author.avatar" :name="article.author.username" size="sm" />
+              <span class="text-sm font-medium text-slate-700 hover:text-brand-600">
+                {{ article.author.username }}
+              </span>
+            </NuxtLink>
+            <span class="text-xs text-slate-400">{{
+              timeAgo(article.publishedAt, locale, now)
+            }}</span>
+            <span class="text-xs text-slate-400 flex items-center gap-1">
+              <Eye class="w-3.5 h-3.5" /> {{ formatCount(article.viewCount) }}
+            </span>
+            <BaseButton
+              size="sm"
+              variant="secondary"
+              :class="{ 'text-brand-600': following }"
+              @click="toggleFollow"
+            >
+              {{ following ? t('article.following') : t('article.follow') }}
+            </BaseButton>
+          </div>
+        </div>
+        <div class="w-40">
+          <img :src="article.cover || ''" :alt="article.title" />
+        </div>
       </div>
 
       <!-- contentHtml 已由后端 markdown 渲染后经 xss 白名单清洗，见 apps/api/src/articles/markdown.util.ts -->
