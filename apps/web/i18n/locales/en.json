@@ -68,7 +68,8 @@
     "publish": "Publish",
     "publishSuccess": "Published",
     "draftSuccess": "Draft saved",
-    "editorTip": "Markdown supported"
+    "editorTip": "Markdown supported",
+    "cropImage": "Crop Image"
   },
   "auth": {
     "username": "Username",

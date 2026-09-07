@@ -68,7 +68,8 @@
     "publish": "发布",
     "publishSuccess": "发布成功",
     "draftSuccess": "草稿已保存",
-    "editorTip": "支持 Markdown 语法"
+    "editorTip": "支持 Markdown 语法",
+    "cropImage": "裁剪图片"
   },
   "auth": {
     "username": "用户名",

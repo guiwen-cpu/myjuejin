@@ -204,6 +204,9 @@ importers:
       '@tanstack/vue-virtual':
         specifier: ^3.13.12
         version: 3.13.35(vue@3.5.41(typescript@5.8.3))
+      cropperjs:
+        specifier: ^1.6.3
+        version: 1.6.3
       lucide-vue-next:
         specifier: ^0.525.0
         version: 0.525.0(vue@3.5.41(typescript@5.8.3))
@@ -4214,6 +4217,9 @@ packages:
   croner@10.0.1:
     resolution: {integrity: sha512-ixNtAJndqh173VQ4KodSdJEI6nuioBWI0V1ITNKhZZsO0pEMoDxz539T4FTTbSZ/xIOSuDnzxLVRqBVSvPNE2g==}
     engines: {node: '>=18.0'}
+
+  cropperjs@1.6.3:
+    resolution: {integrity: sha512-BRb0PRIzjbfM5n+i6L2D85pSbXI/w6cnnwb9W9cRKgAmbiP+OjDeq+Irhd86IujZDXm/7JWECfscllFIdrlmfw==}
 
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
@@ -13048,6 +13054,8 @@ snapshots:
   crelt@1.0.7: {}
 
   croner@10.0.1: {}
+
+  cropperjs@1.6.3: {}
 
   cross-spawn@7.0.6:
     dependencies:

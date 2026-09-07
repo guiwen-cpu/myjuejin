@@ -16,6 +16,12 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
   },
 
+  devServer: {
+    // Windows 下 Nuxt 默认只绑定 IPv6 localhost (::1)，导致 127.0.0.1:3000 连不上，
+    // 浏览器 fetch 上传时报 Failed to fetch。改用双栈 ::，同时监听 IPv4 + IPv6。
+    host: '::',
+  },
+
   runtimeConfig: {
     // 服务端直连 API（容器内网 / 本地 dev 地址），需要带上 /api/v1 全局前缀。
     // 用 127.0.0.1 而非 localhost，避免 Windows 下 localhost 优先解析到 IPv6 ::1。
@@ -52,6 +58,12 @@ export default defineNuxtConfig({
         // h3 匹配 '/api' 前缀路由时会剥掉 /api 再转发，所以 target 需补上 /api，
         // 这样 /api/v1/articles -> /v1/articles -> http://127.0.0.1:3001/api/v1/articles。
         target: process.env.API_PROXY_TARGET || 'http://127.0.0.1:3001/api',
+        changeOrigin: true,
+      },
+      '/uploads': {
+        target:
+          (process.env.API_PROXY_TARGET || 'http://127.0.0.1:3001/api').replace(/\/api$/, '') +
+          '/uploads',
         changeOrigin: true,
       },
     },

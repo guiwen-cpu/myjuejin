@@ -7,24 +7,24 @@
 
 本地开发一共运行 5 个东西，分为两类：
 
-| 类别 | 组件 | 端口 | 作用 |
-| --- | --- | --- | --- |
-| 基础设施（Docker 容器） | PostgreSQL | 5432 | 主数据库，存用户/文章/评论 |
-| 基础设施（Docker 容器） | Redis | 6379 | 缓存、计数、登录态 |
-| 基础设施（Docker 容器） | Meilisearch | 7700 | 全文搜索 |
-| 应用（本机进程） | API（NestJS） | 3001 | 后端接口，Swagger 文档在此 |
-| 应用（本机进程） | Web（Nuxt SSR） | 3000 | 前端网站 |
+| 类别                    | 组件            | 端口 | 作用                       |
+| ----------------------- | --------------- | ---- | -------------------------- |
+| 基础设施（Docker 容器） | PostgreSQL      | 5432 | 主数据库，存用户/文章/评论 |
+| 基础设施（Docker 容器） | Redis           | 6379 | 缓存、计数、登录态         |
+| 基础设施（Docker 容器） | Meilisearch     | 7700 | 全文搜索                   |
+| 应用（本机进程）        | API（NestJS）   | 3001 | 后端接口，Swagger 文档在此 |
+| 应用（本机进程）        | Web（Nuxt SSR） | 3000 | 前端网站                   |
 
 关系一句话：浏览器访问 `3000`（前端）→ 前端调用 `3001`（后端）→ 后端读写三个容器。
 
 ## 2. 环境要求（一次性准备）
 
-| 软件 | 最低版本 | 检查命令 |
-| --- | --- | --- |
-| Node.js | 22.12+ | `node -v` |
-| pnpm | 10+ | `pnpm -v` |
-| Docker Desktop | 最新稳定版 | 打开后等待引擎变绿 |
-| Git | 任意较新版本 | `git --version` |
+| 软件           | 最低版本     | 检查命令           |
+| -------------- | ------------ | ------------------ |
+| Node.js        | 22.12+       | `node -v`          |
+| pnpm           | 10+          | `pnpm -v`          |
+| Docker Desktop | 最新稳定版   | 打开后等待引擎变绿 |
+| Git            | 任意较新版本 | `git --version`    |
 
 本项目开发时安装的 Node 22 位于 `D:\node22`。若 `node -v` 显示的还是 v16，每次新开终端先执行：
 
@@ -106,10 +106,10 @@ pnpm dev
 
 看到两个服务都输出 listening 即可访问：
 
-| 地址 | 说明 |
-| --- | --- |
-| http://localhost:3000 | 前端网站（首页 SSR） |
-| http://localhost:3001/api/docs | Swagger 接口文档 |
+| 地址                           | 说明                 |
+| ------------------------------ | -------------------- |
+| http://localhost:3000          | 前端网站（首页 SSR） |
+| http://localhost:3001/api/docs | Swagger 接口文档     |
 
 ### 第 6 步：登录体验完整链路
 
@@ -136,37 +136,38 @@ pnpm dev
 
 ## 5. 常用命令速查
 
-| 命令 | 作用 |
-| --- | --- |
-| `pnpm dev` | 同时启动 web(3000) + api(3001) |
-| `pnpm dev:web` | 只启动前端 |
-| `pnpm dev:api` | 只启动后端 |
-| `pnpm build` | 构建 shared + api + web（生产产物） |
-| `pnpm test` | 运行后端 Jest + 前端 Vitest 全部测试 |
-| `pnpm db:migrate` | 执行数据库迁移 |
-| `pnpm db:seed` | 写入演示数据 |
-| `pnpm --filter @devshare/api prisma:studio` | 用图形界面浏览数据库 |
-| `docker compose ps` | 查看容器运行状态 |
-| `docker compose down` | 停止并删除容器（数据卷保留，数据不丢） |
+| 命令                                        | 作用                                   |
+| ------------------------------------------- | -------------------------------------- |
+| `pnpm dev`                                  | 同时启动 web(3000) + api(3001)         |
+| `pnpm dev:web`                              | 只启动前端                             |
+| `pnpm dev:api`                              | 只启动后端                             |
+| `pnpm build`                                | 构建 shared + api + web（生产产物）    |
+| `pnpm test`                                 | 运行后端 Jest + 前端 Vitest 全部测试   |
+| `pnpm db:migrate`                           | 执行数据库迁移                         |
+| `pnpm db:seed`                              | 写入演示数据                           |
+| `pnpm --filter @devshare/api prisma:studio` | 用图形界面浏览数据库                   |
+| `docker compose ps`                         | 查看容器运行状态                       |
+| `docker compose down`                       | 停止并删除容器（数据卷保留，数据不丢） |
 
 ## 6. 测试怎么跑
 
-| 测试 | 命令 | 是否需要数据库 |
-| --- | --- | --- |
-| 后端单元测试 | `pnpm --filter @devshare/api test` | 不需要 |
+| 测试              | 命令                                   | 是否需要数据库               |
+| ----------------- | -------------------------------------- | ---------------------------- |
+| 后端单元测试      | `pnpm --filter @devshare/api test`     | 不需要                       |
 | 后端集成测试(e2e) | `pnpm --filter @devshare/api test:e2e` | 需要 postgres 已启动且已迁移 |
-| 前端组件测试 | `pnpm --filter @devshare/web test` | 不需要 |
+| 前端组件测试      | `pnpm --filter @devshare/web test`     | 不需要                       |
 
 ## 7. 常见问题排查
 
-| 现象 | 原因 | 解决办法 |
-| --- | --- | --- |
-| `docker: command not found` | Docker CLI 不在 PATH 或引擎未启动 | 打开 Docker Desktop 等引擎变绿，重开终端 |
-| `P1000: Authentication failed` | 两个 `.env` 密码不一致 | 核对根 `.env` 与 `apps/api/.env` 的密码并改为一致 |
-| `ECONNREFUSED` 连接失败 | postgres/redis/meilisearch 容器没起来 | `docker compose ps` 确认三个服务 running |
-| `Failed to resolve import "@devshare/shared"` | 残留的 Nuxt 进程占用 `.nuxt` 锁文件 | 结束 3000 端口进程，删除 `apps/web/.nuxt/nuxt.lock`（若有），重新 `pnpm dev` |
-| 端口被占用（3000/3001） | 上次的服务没关干净 | `Get-NetTCPConnection -LocalPort 3000,3001` 查看占用进程并结束 |
-| 首页 500 / 接口异常 | 数据库没迁移或种子缺失 | 重新执行 `prisma:migrate` 和 `prisma:seed` |
+| 现象                                                 | 原因                                                                                | 解决办法                                                                                                         |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `docker: command not found`                          | Docker CLI 不在 PATH 或引擎未启动                                                   | 打开 Docker Desktop 等引擎变绿，重开终端                                                                         |
+| `P1000: Authentication failed`                       | 两个 `.env` 密码不一致                                                              | 核对根 `.env` 与 `apps/api/.env` 的密码并改为一致                                                                |
+| `ECONNREFUSED` 连接失败                              | postgres/redis/meilisearch 容器没起来                                               | `docker compose ps` 确认三个服务 running                                                                         |
+| `Failed to resolve import "@devshare/shared"`        | 残留的 Nuxt 进程占用 `.nuxt` 锁文件                                                 | 结束 3000 端口进程，删除 `apps/web/.nuxt/nuxt.lock`（若有），重新 `pnpm dev`                                     |
+| 端口被占用（3000/3001）                              | 上次的服务没关干净                                                                  | `Get-NetTCPConnection -LocalPort 3000,3001` 查看占用进程并结束                                                   |
+| 首页 500 / 接口异常                                  | 数据库没迁移或种子缺失                                                              | 重新执行 `prisma:migrate` 和 `prisma:seed`                                                                       |
+| 图片/封面上传报 `Failed to fetch`（`<no response>`） | Windows 上 Nuxt 开发服务器默认只监听 IPv6 `::1`，浏览器请求 `127.0.0.1:3000` 连不上 | 在 `apps/web/nuxt.config.ts` 设置 `devServer.host: "::"`（并保留 `nitro.devProxy["/uploads"]`），重启 `pnpm dev` |
 
 ## 8. 端口占用检查（Windows）
 
