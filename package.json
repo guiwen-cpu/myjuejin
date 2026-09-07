@@ -45,6 +45,9 @@
     ],
     "*.{json,md,yml,yaml}": [
       "prettier --write"
+    ],
+    "**/*": [
+      "node scripts/lint-staged-check.mjs"
     ]
   }
 }
