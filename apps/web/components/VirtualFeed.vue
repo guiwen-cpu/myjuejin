@@ -14,11 +14,14 @@ const props = withDefaults(
     endReached?: () => void
   }>(),
   {
-    itemHeight: 144,
+    // 卡片主体高度；虚拟行距（pb-3 = 12px）由组件内部统一加上
+    itemHeight: 160,
     overscan: 8,
     loading: false,
   },
 )
+
+const itemSize = computed(() => props.itemHeight + 12)
 
 const parentRef = ref<HTMLElement | null>(null)
 
@@ -36,7 +39,7 @@ onMounted(() => {
 const virtualizer = useVirtualizer({
   count: props.items.length,
   getScrollElement: () => parentRef.value,
-  estimateSize: () => props.itemHeight,
+  estimateSize: () => itemSize.value,
   overscan: props.overscan,
 })
 
@@ -46,11 +49,13 @@ watch(
     virtualizer.value?.setOptions({
       count,
       getScrollElement: () => parentRef.value,
-      estimateSize: () => props.itemHeight,
+      estimateSize: () => itemSize.value,
       overscan: props.overscan,
     } as unknown as VirtualizerOptions<HTMLElement, Element>)
   },
 )
+
+watch(itemSize, () => virtualizer.value?.measure())
 
 // 滚动触底判定：当可视区最后一个条目的 index 距列表末尾不足 5 条时，
 // 通知父组件触发 loadMore（请求 /articles?cursor=… 追加下一页，直到 nextCursor 为空）。

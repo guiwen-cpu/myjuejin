@@ -18,8 +18,18 @@
   "home": {
     "feed": "Feed",
     "hot": "Hot",
+    "all": "All",
     "hotRank": "Hot Rank",
     "tagNav": "Tags",
+    "recAuthors": "Top Authors",
+    "hotTags": "Popular Tags",
+    "posts": "posts",
+    "backTop": "Back to top",
+    "cta": {
+      "title": "Start writing",
+      "desc": "Share your technical insights with every developer",
+      "write": "Write an article"
+    },
     "loadMore": "Load more",
     "noMore": "No more",
     "empty": "No content yet, try another tag"
@@ -43,6 +53,7 @@
     "author": "Author",
     "publishTime": "Published",
     "noComments": "No comments yet",
+    "viewCover": "View cover",
     "deleteSuccess": "Deleted"
   },
   "user": {
@@ -104,7 +115,8 @@
     "error": "Something went wrong",
     "retry": "Retry",
     "back": "Back",
-    "all": "All"
+    "all": "All",
+    "close": "Close"
   },
   "errors": {
     "UNAUTHORIZED": "Please sign in first",

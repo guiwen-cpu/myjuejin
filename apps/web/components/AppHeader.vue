@@ -16,6 +16,13 @@ const searchKeyword = ref('')
 
 const navTags = computed(() => DEFAULT_TAGS.slice(0, 6))
 
+// 解析当前路由是否在某个标签页，如 /tag/frontend 或 /en/tag/frontend
+const activeTagSlug = computed(() => {
+  const segments = route.path.split('/').filter(Boolean)
+  const tagIndex = segments.indexOf('tag')
+  return tagIndex >= 0 && segments[tagIndex + 1] ? segments[tagIndex + 1] : null
+})
+
 function onSearch() {
   const q = searchKeyword.value.trim()
   if (!q) return
@@ -33,12 +40,8 @@ async function onLogout() {
   <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
       <NuxtLink :to="localePath('/')" class="flex items-center gap-2 shrink-0">
-        <span
-          class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 text-white grid place-items-center font-bold text-sm"
-        >
-          D
-        </span>
-        <span class="text-lg font-bold tracking-tight text-slate-900">DevShare（技享）</span>
+        <img src="~/assets/images/logo.svg" alt="" class="w-8 h-8 rounded-lg" />
+        <span class="text-lg font-bold tracking-tight text-slate-900">DevShare</span>
       </NuxtLink>
 
       <nav class="hidden md:flex items-center gap-1 text-sm text-slate-600">
@@ -56,6 +59,9 @@ async function onLogout() {
           :key="tag.slug"
           :to="localePath(`/tag/${tag.slug}`)"
           class="px-3 py-1.5 rounded-md hover:bg-slate-100 hover:text-brand-600"
+          :class="{
+            'text-brand-600 font-medium bg-brand-50': activeTagSlug === tag.slug,
+          }"
         >
           {{ tag.name }}
         </NuxtLink>

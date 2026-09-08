@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Eye, Heart, MessageSquare, Send, Star } from 'lucide-vue-next'
+import { Eye, Heart, MessageSquare, Send, Star, X, ZoomIn } from 'lucide-vue-next'
 import type { ArticleDetail, CommentItem, Paginated } from '@devshare/shared'
 import { useAuthStore } from '~/stores/auth'
 import { formatCount, timeAgo } from '~/utils/format'
@@ -34,6 +34,28 @@ const comments = ref<CommentItem[]>(commentsPage.value?.items ?? [])
 const commentText = ref('')
 const submitting = ref(false)
 const following = ref(false)
+
+// 封面图灯箱：点击封面弹大图，Esc / 点遮罩 / 点关闭按钮均可关闭
+const coverPreviewOpen = ref(false)
+
+function closeCoverPreview() {
+  coverPreviewOpen.value = false
+}
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') closeCoverPreview()
+}
+
+// 弹窗打开时锁定背景滚动，避免底层页面跟着滚
+watch(coverPreviewOpen, (open) => {
+  document.body.style.overflow = open ? 'hidden' : ''
+})
+
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+  document.body.style.overflow = ''
+})
 
 async function toggleLike() {
   if (!auth.isLoggedIn) {
@@ -152,8 +174,25 @@ useHead(() => ({
             </BaseButton>
           </div>
         </div>
-        <div class="w-40">
-          <img :src="article.cover || ''" :alt="article.title" />
+        <div v-if="article.cover" class="w-40 shrink-0">
+          <button
+            type="button"
+            class="group relative block w-full cursor-zoom-in overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+            :title="t('article.viewCover')"
+            :aria-label="t('article.viewCover')"
+            @click="coverPreviewOpen = true"
+          >
+            <img
+              :src="article.cover"
+              :alt="article.title"
+              class="w-full transition duration-300 group-hover:scale-105"
+            />
+            <span
+              class="absolute inset-0 flex items-center justify-center bg-slate-900/0 text-white opacity-0 transition duration-300 group-hover:bg-slate-900/40 group-hover:opacity-100"
+            >
+              <ZoomIn class="h-7 w-7 drop-shadow" />
+            </span>
+          </button>
         </div>
       </div>
 
@@ -230,5 +269,45 @@ useHead(() => ({
         </div>
       </section>
     </aside>
+
+    <!-- 封面大图灯箱 -->
+    <Teleport to="body">
+      <Transition name="cover-fade">
+        <div
+          v-if="coverPreviewOpen && article?.cover"
+          class="fixed inset-0 z-[100] flex cursor-zoom-out items-center justify-center bg-slate-900/90 p-4 sm:p-8"
+          role="dialog"
+          aria-modal="true"
+          @click="closeCoverPreview"
+        >
+          <img
+            :src="article.cover"
+            :alt="article.title"
+            class="max-h-full max-w-full cursor-default rounded-lg object-contain shadow-2xl"
+            @click.stop
+          />
+          <button
+            type="button"
+            class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/25"
+            :aria-label="t('common.close')"
+            @click.stop="closeCoverPreview"
+          >
+            <X class="h-5 w-5" />
+          </button>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
+
+<style scoped>
+.cover-fade-enter-active,
+.cover-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.cover-fade-enter-from,
+.cover-fade-leave-to {
+  opacity: 0;
+}
+</style>

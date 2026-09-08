@@ -6,6 +6,10 @@ const { t } = useI18n()
 const api = useApi()
 
 const slug = computed(() => String(route.params.slug))
+// 当前标签的展示名：命中预设标签显示中文名，未知 slug 直接显示 slug
+const tagLabel = computed(
+  () => DEFAULT_TAGS.find((item) => item.slug === slug.value)?.name ?? slug.value,
+)
 const items = ref<ArticleListItem[]>([])
 const cursor = ref<string | null>(null)
 const loading = ref(false)
@@ -42,7 +46,8 @@ async function loadMore() {
 
 watch(slug, fetchFirst, { immediate: true })
 
-useHead({ title: `${t('home.tagNav')} - DevShare` })
+// 用函数写法：切换 /tag/:slug 或切换语言时自动更新 document.title
+useHead(() => ({ title: `${tagLabel.value} - DevShare` }))
 </script>
 
 <template>

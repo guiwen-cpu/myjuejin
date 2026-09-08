@@ -2,29 +2,59 @@
 import { Eye, Heart, MessageSquare } from 'lucide-vue-next'
 import type { ArticleListItem } from '@devshare/shared'
 import { formatCount, timeAgo } from '~/utils/format'
+import { gradientForSeed, tagChipForSeed } from '~/utils/visual'
 import { useNow } from '~/composables/useNow'
 
-const props = defineProps<{ article: ArticleListItem }>()
+const props = defineProps<{ article: ArticleListItem; showRank?: boolean; rank?: number }>()
 const { locale } = useI18n()
 const now = useNow()
 const localePath = useLocalePath()
+
+const visibleTags = computed(() => props.article.tags.slice(0, 2))
 </script>
 
 <template>
   <article
-    class="bg-white rounded-xl border border-slate-200 hover:border-brand-300 hover:shadow-md transition-all p-4 h-36 flex gap-4 overflow-hidden"
+    class="group bg-white rounded-xl border border-slate-200 hover:border-brand-300 hover:shadow-md transition-all h-40 flex gap-4 overflow-hidden p-4"
   >
     <div class="flex-1 min-w-0 flex flex-col">
+      <!-- 首行：序号/标签 + 发布时间 -->
+      <div class="flex items-center gap-1.5 min-w-0">
+        <span
+          v-if="showRank && rank !== undefined"
+          class="w-5 h-5 rounded-md text-xs font-bold text-white grid place-items-center shrink-0"
+          :class="rank <= 3 ? 'bg-red-500' : 'bg-slate-300'"
+        >
+          {{ rank }}
+        </span>
+        <NuxtLink
+          v-for="tag in visibleTags"
+          :key="tag.id"
+          :to="localePath(`/tag/${tag.slug}`)"
+          class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium transition-colors shrink-0"
+          :class="tagChipForSeed(tag.id)"
+          @click.stop
+        >
+          {{ tag.name }}
+        </NuxtLink>
+        <time class="ml-auto shrink-0 text-xs text-slate-400">
+          {{ timeAgo(props.article.publishedAt, locale, now) }}
+        </time>
+      </div>
+
       <NuxtLink
         :to="localePath(`/article/${props.article.id}`)"
-        class="text-base font-semibold text-slate-900 hover:text-brand-600 leading-snug line-clamp-2"
+        :title="props.article.title"
+        class="mt-1.5 text-[15px] font-semibold text-slate-900 leading-snug line-clamp-2 group-hover:text-brand-600 transition-colors"
       >
         {{ props.article.title }}
       </NuxtLink>
-      <p class="text-sm text-slate-500 mt-1 line-clamp-1">
+
+      <p class="mt-1 text-[13px] text-slate-500 line-clamp-1">
         {{ props.article.summary ?? '' }}
       </p>
-      <div class="mt-auto flex items-center gap-3 text-xs text-slate-400">
+
+      <div class="mt-auto flex items-center gap-2 text-xs text-slate-400">
         <NuxtLink
           :to="localePath(`/user/${props.article.author.id}`)"
           class="flex items-center gap-1.5 hover:text-brand-600 min-w-0"
@@ -34,27 +64,44 @@ const localePath = useLocalePath()
             :name="props.article.author.username"
             size="xs"
           />
-          <span class="truncate">{{ props.article.author.username }}</span>
+          <span class="truncate max-w-28">{{ props.article.author.username }}</span>
         </NuxtLink>
-        <span class="flex items-center gap-1">
-          <Eye class="w-3.5 h-3.5" /> {{ formatCount(props.article.viewCount) }}
+        <span class="flex items-center gap-2.5 ml-auto shrink-0">
+          <span class="flex items-center gap-1" :title="$t('article.views')">
+            <Eye class="w-3.5 h-3.5" /> {{ formatCount(props.article.viewCount) }}
+          </span>
+          <span class="flex items-center gap-1" :title="$t('article.likes')">
+            <Heart class="w-3.5 h-3.5" /> {{ formatCount(props.article.likeCount) }}
+          </span>
+          <span class="flex items-center gap-1" :title="$t('article.comments')">
+            <MessageSquare class="w-3.5 h-3.5" /> {{ formatCount(props.article.commentCount) }}
+          </span>
         </span>
-        <span class="flex items-center gap-1">
-          <Heart class="w-3.5 h-3.5" /> {{ formatCount(props.article.likeCount) }}
-        </span>
-        <span class="flex items-center gap-1">
-          <MessageSquare class="w-3.5 h-3.5" /> {{ formatCount(props.article.commentCount) }}
-        </span>
-        <span class="hidden sm:inline">{{ timeAgo(props.article.publishedAt, locale, now) }}</span>
       </div>
     </div>
-    <div v-if="props.article.cover" class="w-36 shrink-0">
+
+    <!-- 右侧缩略图：有封面图用图，否则用按文章 id 稳定的渐变色占位 -->
+    <NuxtLink
+      :to="localePath(`/article/${props.article.id}`)"
+      class="relative w-32 shrink-0 self-stretch overflow-hidden rounded-lg"
+      :aria-label="props.article.title"
+    >
       <img
+        v-if="props.article.cover"
         :src="props.article.cover"
         :alt="props.article.title"
         loading="lazy"
-        class="w-full h-24 object-cover rounded-lg"
+        class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
-    </div>
+      <div
+        v-else
+        class="w-full h-full grid place-items-center"
+        :class="gradientForSeed(props.article.id)"
+      >
+        <span class="text-white/90 font-bold text-2xl select-none">
+          {{ (props.article.tags[0]?.name ?? '技').charAt(0) }}
+        </span>
+      </div>
+    </NuxtLink>
   </article>
 </template>

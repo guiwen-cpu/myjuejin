@@ -30,7 +30,9 @@ const rankStyles = ['bg-red-500', 'bg-orange-400', 'bg-amber-400']
           >
             {{ item.article.title }}
           </NuxtLink>
-          <span class="text-xs text-slate-400">{{ formatCount(item.article.viewCount) }} views</span>
+          <span class="text-xs text-slate-400">
+            {{ formatCount(item.article.viewCount) }} {{ $t('article.views') }}
+          </span>
         </div>
       </li>
     </ol>

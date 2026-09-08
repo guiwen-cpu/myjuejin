@@ -18,8 +18,18 @@
   "home": {
     "feed": "推荐",
     "hot": "热门",
+    "all": "全部",
     "hotRank": "热门榜",
     "tagNav": "标签导航",
+    "recAuthors": "推荐作者",
+    "hotTags": "热门标签",
+    "posts": "篇文章",
+    "backTop": "回到顶部",
+    "cta": {
+      "title": "开始创作",
+      "desc": "记录你的技术思考，分享给每一位开发者",
+      "write": "写文章"
+    },
     "loadMore": "加载更多",
     "noMore": "没有更多了",
     "empty": "暂时没有内容，换个标签看看吧"
@@ -43,6 +53,7 @@
     "author": "作者",
     "publishTime": "发布于",
     "noComments": "还没有评论，快来抢沙发",
+    "viewCover": "查看封面大图",
     "deleteSuccess": "已删除"
   },
   "user": {
@@ -104,7 +115,8 @@
     "error": "出错了",
     "retry": "重试",
     "back": "返回",
-    "all": "全部"
+    "all": "全部",
+    "close": "关闭"
   },
   "errors": {
     "UNAUTHORIZED": "请先登录",

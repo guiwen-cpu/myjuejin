@@ -5,6 +5,13 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   modules: ['@nuxtjs/i18n', '@nuxt/eslint'],
   css: ['~/assets/css/main.css'],
+  app: {
+    head: {
+      // Nuxt 没有 index.html，浏览器标签页的 favicon 通过 <head> 注入。
+      // 图标文件放在 public/favicon.svg（public 里的文件会原样发布到站点根目录）。
+      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    },
+  },
   ssr: true,
   experimental: {
     // 关闭 payload 提取：把 useAsyncData 数据内联进 HTML，避免 SSR 渲染与
