@@ -189,3 +189,4 @@ docker compose -p devshare-prod logs -f --tail=100 api web
 - `nginx` 容器通过只读卷挂载该目录（见 `docker-compose.yml`），并用 `error_page` 在 404 / 502-504 时内部重定向到对应静态页。
 - 修改 `deploy/errors/` 后无需重建镜像，重新 `docker compose up -d` 即可生效（nginx 加载最新文件）。
 - 语言按 URL 前缀区分：默认中文（根路径 `/`），英文走 `/en`。
+- `location /` 与 `location /_nuxt/` 已开启 `proxy_intercept_errors on`，因此 Nuxt 返回的 404 也会被静态错误页接管；3xx 重定向仍正常透传。
