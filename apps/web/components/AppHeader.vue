@@ -44,10 +44,10 @@ async function onLogout() {
         <span class="text-lg font-bold tracking-tight text-slate-900">DevShare</span>
       </NuxtLink>
 
-      <nav class="hidden md:flex items-center gap-1 text-sm text-slate-600">
+      <nav class="hidden lg:flex items-center gap-1 text-sm text-slate-600">
         <NuxtLink
           :to="localePath('/')"
-          class="px-3 py-1.5 rounded-md hover:bg-slate-100 hover:text-brand-600"
+          class="px-3 py-1.5 rounded-md hover:bg-slate-100 hover:text-brand-600 shrink-0"
           :class="{
             'text-brand-600 font-medium bg-brand-50': route.path === '/' || route.path === '/en',
           }"
@@ -58,7 +58,7 @@ async function onLogout() {
           v-for="tag in navTags"
           :key="tag.slug"
           :to="localePath(`/tag/${tag.slug}`)"
-          class="px-3 py-1.5 rounded-md hover:bg-slate-100 hover:text-brand-600"
+          class="px-3 py-1.5 rounded-md hover:bg-slate-100 hover:text-brand-600 shrink-0"
           :class="{
             'text-brand-600 font-medium bg-brand-50': activeTagSlug === tag.slug,
           }"

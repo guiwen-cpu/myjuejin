@@ -18,6 +18,8 @@ COPY . .
 RUN pnpm --filter @devshare/shared build
 RUN pnpm --filter @devshare/api exec prisma generate
 RUN pnpm --filter @devshare/api build
+# Compile the Prisma seed to JS so prisma db seed works without ts-node in the prod image
+RUN pnpm --filter @devshare/api exec tsc prisma/seed.ts --outDir prisma --rootDir prisma --module commonjs --target es2020 --esModuleInterop --skipLibCheck --moduleResolution node --resolveJsonModule --sourceMap false
 RUN pnpm --filter @devshare/api deploy --prod --legacy --ignore-scripts /app/prod
 # pnpm deploy 不会把 prisma generate 生成的客户端(.prisma/client，含 query engine)带进产物，
 # 导致运行时 @prisma/client 报 "did not initialize yet"。这里把构建阶段已生成的客户端拷进部署目录。
