@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException } from '@nestjs/common'
+import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { Prisma } from '@prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
@@ -9,7 +9,10 @@ describe('TagsService', () => {
   const prisma = {
     tag: {
       findMany: jest.fn(),
+      findUnique: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
     },
   }
 
@@ -34,7 +37,7 @@ describe('TagsService', () => {
     expect(result).toEqual([{ id: 1, name: 'Vue', slug: 'vue', articleCount: 3 }])
   })
 
-  it('rejects non-admin users', async () => {
+  it('rejects non-admin users on create', async () => {
     await expect(service.create(user, { name: 'Vue' })).rejects.toBeInstanceOf(ForbiddenException)
     expect(prisma.tag.create).not.toHaveBeenCalled()
   })
@@ -74,5 +77,60 @@ describe('TagsService', () => {
     await expect(service.create(admin, { name: 'Vue', slug: 'vue' })).rejects.toBeInstanceOf(
       ConflictException,
     )
+  })
+
+  it('rejects non-admin users on update', async () => {
+    await expect(service.update(user, 1, { name: 'Vue' })).rejects.toBeInstanceOf(
+      ForbiddenException,
+    )
+    expect(prisma.tag.update).not.toHaveBeenCalled()
+  })
+
+  it('throws NotFoundException when updating a missing tag', async () => {
+    prisma.tag.findUnique.mockResolvedValueOnce(null)
+
+    await expect(service.update(admin, 999, { name: 'Vue' })).rejects.toBeInstanceOf(
+      NotFoundException,
+    )
+  })
+
+  it('updates a tag and returns its article count', async () => {
+    prisma.tag.findUnique.mockResolvedValueOnce({ id: 1, name: 'Vue', slug: 'vue' })
+    prisma.tag.update.mockResolvedValueOnce({
+      id: 1,
+      name: 'Vue 3',
+      slug: 'vue',
+      _count: { articles: 4 },
+    })
+
+    const result = await service.update(admin, 1, { name: 'Vue 3' })
+
+    expect(prisma.tag.update).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: { name: 'Vue 3' },
+      include: { _count: { select: { articles: true } } },
+    })
+    expect(result).toEqual({ id: 1, name: 'Vue 3', slug: 'vue', articleCount: 4 })
+  })
+
+  it('rejects non-admin users on remove', async () => {
+    await expect(service.remove(user, 1)).rejects.toBeInstanceOf(ForbiddenException)
+    expect(prisma.tag.delete).not.toHaveBeenCalled()
+  })
+
+  it('throws NotFoundException when removing a missing tag', async () => {
+    prisma.tag.findUnique.mockResolvedValueOnce(null)
+
+    await expect(service.remove(admin, 999)).rejects.toBeInstanceOf(NotFoundException)
+  })
+
+  it('removes a tag', async () => {
+    prisma.tag.findUnique.mockResolvedValueOnce({ id: 1, name: 'Vue', slug: 'vue' })
+    prisma.tag.delete.mockResolvedValueOnce({ id: 1 })
+
+    const result = await service.remove(admin, 1)
+
+    expect(prisma.tag.delete).toHaveBeenCalledWith({ where: { id: 1 } })
+    expect(result).toEqual({ success: true })
   })
 })

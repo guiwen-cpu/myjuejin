@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { DEFAULT_TAGS } from '@devshare/shared'
-import { LogOut, PenLine, Search, Settings, User } from 'lucide-vue-next'
+import { LogOut, PenLine, Search, Settings, Tags, User } from 'lucide-vue-next'
 import { useAuthStore } from '~/stores/auth'
 import { useHydrated } from '~/composables/useHydrated'
 
@@ -130,6 +130,13 @@ async function onLogout() {
               class="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-slate-50 rounded-md"
             >
               <Settings class="w-4 h-4 text-slate-400" /> {{ t('nav.settings') }}
+            </NuxtLink>
+            <NuxtLink
+              v-if="auth.user?.role === 'admin'"
+              :to="localePath('/admin/tags')"
+              class="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-slate-50 rounded-md"
+            >
+              <Tags class="w-4 h-4 text-slate-400" /> {{ t('nav.adminTags') }}
             </NuxtLink>
             <button
               class="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-slate-50 rounded-md text-red-500"

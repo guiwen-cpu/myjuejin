@@ -11,6 +11,7 @@
     "logout": "退出登录",
     "settings": "个人设置",
     "profile": "个人主页",
+    "adminTags": "标签管理",
     "language": "语言",
     "zh": "中文",
     "en": "English"
@@ -105,6 +106,22 @@
     "empty": "没有找到相关内容",
     "result": "搜索结果"
   },
+  "admin": {
+    "subtitle": "维护站点标签，支持增删改查",
+    "new": "新建标签",
+    "name": "标签名称",
+    "slug": "标识（slug）",
+    "slugPlaceholder": "如 frontend，留空自动生成",
+    "articleCount": "文章数",
+    "actions": "操作",
+    "edit": "编辑",
+    "delete": "删除",
+    "createTitle": "新建标签",
+    "editTitle": "编辑标签",
+    "requireName": "请填写标签名称",
+    "empty": "还没有标签，点击右上角新建",
+    "confirmDelete": "确定删除标签“{name}”？删除后该标签会从相关文章中移除"
+  },
   "common": {
     "loading": "加载中…",
     "confirm": "确定",
@@ -131,7 +148,9 @@
     "UPLOAD_TOO_LARGE": "图片太大",
     "UNSUPPORTED_FILE_TYPE": "仅支持图片文件",
     "SEARCH_UNAVAILABLE": "搜索暂不可用",
-    "VALIDATION_FAILED": "提交内容有误，请检查"
+    "VALIDATION_FAILED": "提交内容有误，请检查",
+    "CONFLICT": "标签名称或标识已存在",
+    "TAG_NOT_FOUND": "标签不存在"
   },
   "footer": {
     "desc": "DevShare（技享）—— 开发者技术分享社区",
