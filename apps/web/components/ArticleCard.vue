@@ -2,19 +2,23 @@
 import { Eye, Heart, MessageSquare } from 'lucide-vue-next'
 import type { ArticleListItem } from '@devshare/shared'
 import { formatCount, timeAgo } from '~/utils/format'
-import { gradientForSeed, tagChipForSeed } from '~/utils/visual'
+import { tagChipForSeed } from '~/utils/visual'
 import { useNow } from '~/composables/useNow'
 
 const props = defineProps<{ article: ArticleListItem; showRank?: boolean; rank?: number }>()
 const { locale } = useI18n()
 const now = useNow()
 const localePath = useLocalePath()
-
+const router = useRouter()
+function handleToArticlaDetail() {
+  router.push(localePath(`/article/${props.article.id}`))
+}
 const visibleTags = computed(() => props.article.tags.slice(0, 2))
 </script>
 
 <template>
   <article
+    @click="handleToArticlaDetail"
     class="group bg-white rounded-xl border border-slate-200 hover:border-brand-300 hover:shadow-md transition-all h-40 flex gap-4 overflow-hidden p-4"
   >
     <div class="flex-1 min-w-0 flex flex-col">
@@ -56,6 +60,7 @@ const visibleTags = computed(() => props.article.tags.slice(0, 2))
 
       <div class="mt-auto flex items-center gap-2 text-xs text-slate-400">
         <NuxtLink
+          @click.stop
           :to="localePath(`/user/${props.article.author.id}`)"
           class="flex items-center gap-1.5 hover:text-brand-600 min-w-0"
         >
@@ -93,15 +98,6 @@ const visibleTags = computed(() => props.article.tags.slice(0, 2))
         loading="lazy"
         class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
-      <div
-        v-else
-        class="w-full h-full grid place-items-center"
-        :class="gradientForSeed(props.article.id)"
-      >
-        <span class="text-white/90 font-bold text-2xl select-none">
-          {{ (props.article.tags[0]?.name ?? '技').charAt(0) }}
-        </span>
-      </div>
     </NuxtLink>
   </article>
 </template>
