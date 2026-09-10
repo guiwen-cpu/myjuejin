@@ -19,9 +19,9 @@ name: CI/CD
 
 # 触发条件：哪些事件会启动这个流水线
 on:
-  pull_request:            # 有 PR 时（含 PR 后续更新）1
-  push:                    # 有 push 时
-    branches: [dev, main]  # 只监听 dev 和 main 两个分支
+  pull_request: # 有 PR 时（含 PR 后续更新）
+  push: # 有 push 时
+    branches: [dev, main] # 只监听 dev 和 main 两个分支
 
 # 并发控制：同一个分支同时只跑一个流水线；
 # 新的 push 会取消旧的那次还没跑完的（避免部署撞车）
@@ -33,28 +33,28 @@ jobs:
   # ---------------- 任务 1：代码检查 + 测试（PR 和 push 都会跑）----------------
   ci:
     name: Lint & Test
-    runs-on: ubuntu-latest   # 跑在 GitHub 提供的 Ubuntu 云机器上
+    runs-on: ubuntu-latest # 跑在 GitHub 提供的 Ubuntu 云机器上
     steps:
       - name: Checkout
-        uses: actions/checkout@v5   # 把仓库代码下载到这台云机器上
+        uses: actions/checkout@v5 # 把仓库代码下载到这台云机器上
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6  # 安装 pnpm（版本自动读 package.json 的 packageManager）
+        uses: pnpm/action-setup@v6 # 安装 pnpm（版本自动读 package.json 的 packageManager）
 
       - name: Setup Node
-        uses: actions/setup-node@v5  # 安装 Node.js 22，并用 pnpm 缓存依赖加速
+        uses: actions/setup-node@v5 # 安装 Node.js 22，并用 pnpm 缓存依赖加速
         with:
           node-version: 22
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile  # 严格按锁文件装依赖，保证与本地一致
+        run: pnpm install --frozen-lockfile # 严格按锁文件装依赖，保证与本地一致
 
       - name: Lint
-        run: pnpm lint                       # 类型检查（TS 编译检查）
+        run: pnpm lint # 类型检查（TS 编译检查）
 
       - name: Test
-        run: pnpm test                       # 跑单元测试（web vitest + api jest）
+        run: pnpm test # 跑单元测试（web vitest + api jest）
 
   # ---------------- 任务 2：构建镜像并推送到阿里云 ACR ----------------
   # 只有"push 到 dev/main"才跑（PR 不构建）。needs: ci 表示 ci 通过后才轮到它。
@@ -94,7 +94,7 @@ jobs:
       - name: Resolve ACR registry host
         id: acr
         env:
-          ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}   # secrets 从 GitHub 仓库/环境配置里读取
+          ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }} # secrets 从 GitHub 仓库/环境配置里读取
         run: |
           if [[ "$ACR_REGISTRY" == */* ]]; then
             echo "host=${ACR_REGISTRY%/*}" >> "$GITHUB_OUTPUT"
@@ -103,10 +103,10 @@ jobs:
           fi
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4   # 启用 Buildx（带缓存的镜像构建）
+        uses: docker/setup-buildx-action@v4 # 启用 Buildx（带缓存的镜像构建）
 
       - name: Login to ACR
-        uses: docker/login-action@v4          # 登录阿里云镜像仓库，之后才能 push
+        uses: docker/login-action@v4 # 登录阿里云镜像仓库，之后才能 push
         with:
           registry: ${{ steps.acr.outputs.host }}
           username: ${{ secrets.ACR_USERNAME }}
@@ -137,9 +137,9 @@ jobs:
       - name: Build & push web
         uses: docker/build-push-action@v7
         with:
-          context: .                          # 构建上下文 = 仓库根目录
-          file: apps/web/Dockerfile           # 用哪个 Dockerfile
-          push: true                          # 构建完推送到镜像仓库
+          context: . # 构建上下文 = 仓库根目录
+          file: apps/web/Dockerfile # 用哪个 Dockerfile
+          push: true # 构建完推送到镜像仓库
           provenance: false
           sbom: false
           tags: |
@@ -170,7 +170,7 @@ jobs:
   # environment: staging 表示这个任务使用"staging 环境"的 secrets（也可在 GitHub 上设保护规则）
   deploy-staging:
     name: Deploy Staging
-    needs: build-push            # 等镜像构建推送完成
+    needs: build-push # 等镜像构建推送完成
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     environment: staging
@@ -186,9 +186,9 @@ jobs:
 
       - name: Deploy via SSH
         env:
-          SERVER_HOST: ${{ secrets.SERVER_HOST }}   # 服务器 IP
-          SERVER_USER: ${{ secrets.SERVER_USER }}   # 登录用户名（如 root）
-          SHA: ${{ needs.build-push.outputs.sha }}       # 从任务 2 拿镜像标签 sha
+          SERVER_HOST: ${{ secrets.SERVER_HOST }} # 服务器 IP
+          SERVER_USER: ${{ secrets.SERVER_USER }} # 登录用户名（如 root）
+          SHA: ${{ needs.build-push.outputs.sha }} # 从任务 2 拿镜像标签 sha
           COMMIT: ${{ needs.build-push.outputs.commit }} # 完整提交号
         run: |
           # 远程在服务器上执行一整条命令：

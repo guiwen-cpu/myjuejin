@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { ArticleDetail, TagDTO } from '@devshare/shared'
+import type { UploadImgEvent } from 'md-editor-v3'
+import { useUpload } from '~/composables/useUpload'
+import { useImageCropper } from '~/composables/useImageCropper'
 
 const MdEditor = defineAsyncComponent(async () => {
   const mod = await import('md-editor-v3')
@@ -12,6 +15,16 @@ const api = useApi()
 const router = useRouter()
 const localePath = useLocalePath()
 const toast = useToast()
+const { uploadImage } = useUpload()
+const {
+  open: cropperOpen,
+  src: cropperSrc,
+  title: cropperTitle,
+  aspectRatio: cropperAspectRatio,
+  openCropper,
+  cancel: cancelCrop,
+  confirm: confirmCrop,
+} = useImageCropper()
 
 const form = reactive({
   title: '',
@@ -31,16 +44,17 @@ function toggleTag(id: number) {
   else form.tagIds.push(id)
 }
 
+const handleUploadImg: UploadImgEvent = (files, insert) => {
+  openCropper(files, insert, { title: t('write.cropImage') })
+}
+
 async function uploadCover(e: Event) {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
   uploading.value = true
   try {
-    const fd = new FormData()
-    fd.append('file', file)
-    const res = await api.post<{ url: string }>('/uploads', fd, { headers: {} })
-    form.cover = res.url
+    form.cover = await uploadImage(file)
     toast.success(t('common.saved'))
   } finally {
     uploading.value = false
@@ -93,6 +107,22 @@ async function submit(publish: boolean) {
         </div>
       </div>
 
+      <div v-if="form.cover" class="relative mt-2">
+        <img
+          :src="form.cover"
+          :alt="t('write.cover')"
+          class="h-40 w-full rounded-lg border border-slate-200 object-cover"
+        />
+        <button
+          type="button"
+          class="absolute right-2 top-2 rounded-full bg-slate-900/60 px-2.5 py-1 text-xs text-white hover:bg-slate-900/80"
+          title="移除封面"
+          @click="form.cover = ''"
+        >
+          ×
+        </button>
+      </div>
+
       <div class="flex flex-wrap gap-2">
         <button
           v-for="tag in tags ?? []"
@@ -116,7 +146,22 @@ async function submit(publish: boolean) {
         <MdEditor
           v-model="form.contentMd"
           :language="locale === 'zh' ? 'zh-CN' : 'en-US'"
-          :toolbars="['bold', 'italic', 'strikeThrough', '-', 'title', 'quote', 'code', 'link', 'image', 'table', '=', 'revoke', 'next']"
+          :toolbars="[
+            'bold',
+            'italic',
+            'strikeThrough',
+            '-',
+            'title',
+            'quote',
+            'code',
+            'link',
+            'image',
+            'table',
+            '=',
+            'revoke',
+            'next',
+          ]"
+          :on-upload-img="handleUploadImg"
           style="height: 520px"
         />
       </div>
@@ -130,5 +175,14 @@ async function submit(publish: boolean) {
         {{ t('write.publish') }}
       </BaseButton>
     </div>
+
+    <ImageCropperDialog
+      :open="cropperOpen"
+      :src="cropperSrc"
+      :title="cropperTitle"
+      :aspect-ratio="cropperAspectRatio"
+      @cancel="cancelCrop"
+      @confirm="confirmCrop"
+    />
   </div>
 </template>

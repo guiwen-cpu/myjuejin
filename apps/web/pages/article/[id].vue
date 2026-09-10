@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { Eye, Heart, MessageSquare, Send, Star } from 'lucide-vue-next'
+import { Eye, Heart, MessageSquare, Send, Star, X, ZoomIn } from 'lucide-vue-next'
 import type { ArticleDetail, CommentItem, Paginated } from '@devshare/shared'
 import { useAuthStore } from '~/stores/auth'
 import { formatCount, timeAgo } from '~/utils/format'
+import { useNow } from '~/composables/useNow'
+import { useHydrated } from '~/composables/useHydrated'
 
 const route = useRoute()
 const { t, locale } = useI18n()
@@ -10,16 +12,22 @@ const api = useApi()
 const auth = useAuthStore()
 const toast = useToast()
 const localePath = useLocalePath()
+const now = useNow()
+const hydrated = useHydrated()
 
 const articleId = computed(() => Number(route.params.id))
 
-const { data: article, pending, refresh } = await useAsyncData(
-  `article-${articleId.value}`,
-  () => api.get<ArticleDetail>(`/articles/${articleId.value}`),
+const {
+  data: article,
+  pending,
+  refresh,
+} = await useAsyncData(`article-${articleId.value}`, () =>
+  api.get<ArticleDetail>(`/articles/${articleId.value}`),
 )
-const { data: commentsPage } = await useAsyncData(
-  `comments-${articleId.value}`,
-  () => api.get<Paginated<CommentItem>>(`/articles/${articleId.value}/comments`, { query: { limit: 30 } }),
+const { data: commentsPage } = await useAsyncData(`comments-${articleId.value}`, () =>
+  api.get<Paginated<CommentItem>>(`/articles/${articleId.value}/comments`, {
+    query: { limit: 30 },
+  }),
 )
 
 const comments = ref<CommentItem[]>(commentsPage.value?.items ?? [])
@@ -27,16 +35,39 @@ const commentText = ref('')
 const submitting = ref(false)
 const following = ref(false)
 
+// 封面图灯箱：点击封面弹大图，Esc / 点遮罩 / 点关闭按钮均可关闭
+const coverPreviewOpen = ref(false)
+
+function closeCoverPreview() {
+  coverPreviewOpen.value = false
+}
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') closeCoverPreview()
+}
+
+// 弹窗打开时锁定背景滚动，避免底层页面跟着滚
+watch(coverPreviewOpen, (open) => {
+  document.body.style.overflow = open ? 'hidden' : ''
+})
+
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+  document.body.style.overflow = ''
+})
+
 async function toggleLike() {
   if (!auth.isLoggedIn) {
     toast.info(t('errors.UNAUTHORIZED'))
     return
   }
-  const res = await api.post<{ liked: boolean; likeCount: number }>(`/articles/${articleId.value}/like`)
-  if (article.value) {
-    article.value.likedByMe = res.liked
-    article.value.likeCount = res.likeCount
-  }
+  await api.post<{ liked: boolean; likeCount: number }>(`/articles/${articleId.value}/like`)
+  // if (article.value) {
+  //   article.value.likedByMe = res.liked
+  //   article.value.likeCount = res.likeCount
+  // }
+  refresh()
 }
 
 async function toggleCollect() {
@@ -44,13 +75,14 @@ async function toggleCollect() {
     toast.info(t('errors.UNAUTHORIZED'))
     return
   }
-  const res = await api.post<{ collected: boolean; collectCount: number }>(
+  await api.post<{ collected: boolean; collectCount: number }>(
     `/articles/${articleId.value}/collect`,
   )
-  if (article.value) {
-    article.value.collectedByMe = res.collected
-    article.value.collectCount = res.collectCount
-  }
+  refresh()
+  // if (article.value) {
+  //   article.value.collectedByMe = res.collected
+  //   article.value.collectCount = res.collectCount
+  // }
 }
 
 async function toggleFollow() {
@@ -68,7 +100,9 @@ async function submitComment() {
   if (!content || !article.value) return
   submitting.value = true
   try {
-    const comment = await api.post<CommentItem>(`/articles/${articleId.value}/comments`, { content })
+    const comment = await api.post<CommentItem>(`/articles/${articleId.value}/comments`, {
+      content,
+    })
     comments.value.unshift(comment)
     commentText.value = ''
     article.value.commentCount += 1
@@ -104,42 +138,70 @@ useHead(() => ({
 
   <div v-else-if="article" class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 items-start">
     <article class="bg-white rounded-xl border border-slate-200 p-6 sm:p-8">
-      <div class="flex items-center gap-2 mb-3">
-        <BaseTag v-for="tag in article.tags" :key="tag.id" :name="tag.name" :slug="tag.slug" />
+      <div class="flex justify-between gap-4 pb-5 border-b border-slate-100 mb-6">
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <BaseTag v-for="tag in article.tags" :key="tag.id" :name="tag.name" :slug="tag.slug" />
+          </div>
+
+          <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 leading-snug mb-4">
+            {{ article.title }}
+          </h1>
+
+          <div class="flex items-center gap-3">
+            <NuxtLink
+              :to="localePath(`/user/${article.author.id}`)"
+              class="flex items-center gap-2"
+            >
+              <BaseAvatar :src="article.author.avatar" :name="article.author.username" size="sm" />
+              <span class="text-sm font-medium text-slate-700 hover:text-brand-600">
+                {{ article.author.username }}
+              </span>
+            </NuxtLink>
+            <span class="text-xs text-slate-400">{{
+              timeAgo(article.publishedAt, locale, now)
+            }}</span>
+            <span class="text-xs text-slate-400 flex items-center gap-1">
+              <Eye class="w-3.5 h-3.5" /> {{ formatCount(article.viewCount) }}
+            </span>
+            <BaseButton
+              size="sm"
+              variant="secondary"
+              :class="{ 'text-brand-600': following }"
+              @click="toggleFollow"
+            >
+              {{ following ? t('article.following') : t('article.follow') }}
+            </BaseButton>
+          </div>
+        </div>
+        <div v-if="article.cover" class="w-40 shrink-0">
+          <button
+            type="button"
+            class="group relative block w-full cursor-zoom-in overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+            :title="t('article.viewCover')"
+            :aria-label="t('article.viewCover')"
+            @click="coverPreviewOpen = true"
+          >
+            <img
+              :src="article.cover"
+              :alt="article.title"
+              class="w-full transition duration-300 group-hover:scale-105"
+            />
+            <span
+              class="absolute inset-0 flex items-center justify-center bg-slate-900/0 text-white opacity-0 transition duration-300 group-hover:bg-slate-900/40 group-hover:opacity-100"
+            >
+              <ZoomIn class="h-7 w-7 drop-shadow" />
+            </span>
+          </button>
+        </div>
       </div>
 
-      <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 leading-snug mb-4">
-        {{ article.title }}
-      </h1>
-
-      <div class="flex items-center gap-3 pb-5 border-b border-slate-100 mb-6">
-        <NuxtLink :to="localePath(`/user/${article.author.id}`)" class="flex items-center gap-2">
-          <BaseAvatar :src="article.author.avatar" :name="article.author.username" size="sm" />
-          <span class="text-sm font-medium text-slate-700 hover:text-brand-600">
-            {{ article.author.username }}
-          </span>
-        </NuxtLink>
-        <span class="text-xs text-slate-400">{{ timeAgo(article.publishedAt, locale) }}</span>
-        <span class="text-xs text-slate-400 flex items-center gap-1">
-          <Eye class="w-3.5 h-3.5" /> {{ formatCount(article.viewCount) }}
-        </span>
-        <BaseButton
-          size="sm"
-          variant="secondary"
-          :class="{ 'text-brand-600': following }"
-          @click="toggleFollow"
-        >
-          {{ following ? t('article.following') : t('article.follow') }}
-        </BaseButton>
-      </div>
-
+      <!-- contentHtml 已由后端 markdown 渲染后经 xss 白名单清洗，见 apps/api/src/articles/markdown.util.ts -->
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <div class="prose-content" v-html="article.contentHtml" />
 
       <div class="flex items-center justify-center gap-3 mt-8 pt-6 border-t border-slate-100">
-        <BaseButton
-          :variant="article.likedByMe ? 'primary' : 'secondary'"
-          @click="toggleLike"
-        >
+        <BaseButton :variant="article.likedByMe ? 'primary' : 'secondary'" @click="toggleLike">
           <Heart class="w-4 h-4" :fill="article.likedByMe ? 'currentColor' : 'none'" />
           {{ article.likedByMe ? t('article.liked') : t('article.like') }} ·
           {{ formatCount(article.likeCount) }}
@@ -161,10 +223,7 @@ useHead(() => ({
         </h2>
 
         <form class="flex gap-2 mb-6" @submit.prevent="submitComment">
-          <BaseInput
-            v-model="commentText"
-            :placeholder="t('article.commentPlaceholder')"
-          />
+          <BaseInput v-model="commentText" :placeholder="t('article.commentPlaceholder')" />
           <BaseButton type="submit" :loading="submitting" :disabled="!commentText.trim()">
             <Send class="w-4 h-4" />
           </BaseButton>
@@ -175,17 +234,17 @@ useHead(() => ({
         </div>
         <div v-else class="flex flex-col gap-4">
           <div v-for="comment in comments" :key="comment.id" class="flex gap-3">
-            <BaseAvatar
-              :src="comment.author.avatar"
-              :name="comment.author.username"
-              size="sm"
-            />
+            <BaseAvatar :src="comment.author.avatar" :name="comment.author.username" size="sm" />
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2">
-                <span class="text-sm font-medium text-slate-700">{{ comment.author.username }}</span>
-                <span class="text-xs text-slate-400">{{ timeAgo(comment.createdAt, locale) }}</span>
+                <span class="text-sm font-medium text-slate-700">{{
+                  comment.author.username
+                }}</span>
+                <span class="text-xs text-slate-400">{{
+                  timeAgo(comment.createdAt, locale, now)
+                }}</span>
                 <button
-                  v-if="auth.user?.id === comment.author.id"
+                  v-if="hydrated && auth.user?.id === comment.author.id"
                   class="ml-auto text-xs text-slate-400 hover:text-red-500"
                   @click="deleteComment(comment)"
                 >
@@ -210,5 +269,45 @@ useHead(() => ({
         </div>
       </section>
     </aside>
+
+    <!-- 封面大图灯箱 -->
+    <Teleport to="body">
+      <Transition name="cover-fade">
+        <div
+          v-if="coverPreviewOpen && article?.cover"
+          class="fixed inset-0 z-[100] flex cursor-zoom-out items-center justify-center bg-slate-900/90 p-4 sm:p-8"
+          role="dialog"
+          aria-modal="true"
+          @click="closeCoverPreview"
+        >
+          <img
+            :src="article.cover"
+            :alt="article.title"
+            class="max-h-full max-w-full cursor-default rounded-lg object-contain shadow-2xl"
+            @click.stop
+          />
+          <button
+            type="button"
+            class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/25"
+            :aria-label="t('common.close')"
+            @click.stop="closeCoverPreview"
+          >
+            <X class="h-5 w-5" />
+          </button>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
+
+<style scoped>
+.cover-fade-enter-active,
+.cover-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.cover-fade-enter-from,
+.cover-fade-leave-to {
+  opacity: 0;
+}
+</style>

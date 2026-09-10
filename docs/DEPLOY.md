@@ -182,3 +182,11 @@ docker compose -p devshare-prod logs -f --tail=100 api web
 - **首页缓存不刷新**：SWR 60 秒 + CDN 60 秒是预期行为；文章发布后最长 ~2 分钟全网可见。
 - **本机 Node 版本**：nvm-windows 用户在管理员终端 `nvm use 22.14.0`；或直接使用 `D:\node22`
   （将 `D:\node22` 放到 PATH 最前）。
+
+## 11. 静态错误页（404 / 5xx）
+
+- 品牌化错误页源文件在 `deploy/errors/{zh,en}/{404,5xx}.html`，自包含（内联 CSS / SVG），无需外部资源。
+- `nginx` 容器通过只读卷挂载该目录（见 `docker-compose.yml`），并用 `error_page` 在 404 / 502-504 时内部重定向到对应静态页。
+- 修改 `deploy/errors/` 后无需重建镜像，重新 `docker compose up -d` 即可生效（nginx 加载最新文件）。
+- 语言按 URL 前缀区分：默认中文（根路径 `/`），英文走 `/en`。
+- `location /` 与 `location /_nuxt/` 已开启 `proxy_intercept_errors on`，因此 Nuxt 返回的 404 也会被静态错误页接管；3xx 重定向仍正常透传。

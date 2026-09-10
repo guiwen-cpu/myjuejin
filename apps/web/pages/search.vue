@@ -26,13 +26,15 @@ async function runSearch() {
   }
 }
 
-watch(keyword, () => {
-  if (!import.meta.client) return
-  const url = new URL(window.location.href)
-  url.searchParams.set('q', keyword.value)
-  window.history.replaceState(null, '', url)
-  runSearch()
-})
+// 页面内不再放搜索框，关键词全部来自 header 的搜索框（通过 URL 的 ?q= 传入）。
+// 已在搜索页时再次提交新词，route.query 会变化，这里重新拉取结果。
+watch(
+  () => route.query.q,
+  (q) => {
+    keyword.value = String(q ?? '')
+    runSearch()
+  },
+)
 
 onMounted(runSearch)
 
@@ -41,8 +43,6 @@ useHead({ title: `${t('search.result')} - DevShare` })
 
 <template>
   <div class="max-w-3xl mx-auto">
-    <BaseInput v-model="keyword" :placeholder="t('search.placeholder')" class="mb-5" />
-
     <BaseTabs
       v-model="activeTab"
       :tabs="[
@@ -64,7 +64,10 @@ useHead({ title: `${t('search.result')} - DevShare` })
     </template>
 
     <template v-else>
-      <div v-if="result.users.length > 0" class="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+      <div
+        v-if="result.users.length > 0"
+        class="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100"
+      >
         <NuxtLink
           v-for="user in result.users"
           :key="user.id"

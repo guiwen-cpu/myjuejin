@@ -34,11 +34,11 @@ services:
       # 127.0.0.1 前缀：只允许本机访问（本地 pnpm dev 的 API 要连），不暴露公网
       # ${POSTGRES_HOST_PORT:-5432}：默认 5432；staging 在 .env.staging 里改成
       # 15432，和 prod 的 5432 错开，同一台机器两套环境才不会抢端口
-      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+      - '127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-devshare}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-devshare}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -50,11 +50,11 @@ services:
     command: redis-server --appendonly yes
     ports:
       # Redis 默认 6379；staging 在 .env.staging 里改成 16379 与 prod 错开
-      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
+      - '127.0.0.1:${REDIS_HOST_PORT:-6379}:6379'
     volumes:
       - redisdata:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -68,7 +68,7 @@ services:
       MEILI_ENV: production
     ports:
       # Meilisearch 默认 7700；staging 在 .env.staging 里改成 17700 与 prod 错开
-      - "127.0.0.1:${MEILI_HOST_PORT:-7700}:7700"
+      - '127.0.0.1:${MEILI_HOST_PORT:-7700}:7700'
     volumes:
       - meilidata:/meili_data
     networks: [devshare]
@@ -91,8 +91,8 @@ services:
       REDIS_URL: redis://redis:6379
       # 默认值仅供本地开发快速上手；生产部署务必在 .env 里覆盖为强随机值
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-devshare-access-secret-change-me}
-      ACCESS_TOKEN_TTL_SECONDS: "1800"
-      REFRESH_TOKEN_TTL_SECONDS: "604800"
+      ACCESS_TOKEN_TTL_SECONDS: '1800'
+      REFRESH_TOKEN_TTL_SECONDS: '604800'
       # 允许跨域访问 API 的前端地址（浏览器请求会被 CORS 拦截）
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
       # Meilisearch 地址：用服务名 meilisearch 当域名
@@ -101,7 +101,7 @@ services:
       # 对外公开的 API 地址，用于生成上传文件的访问链接
       PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:3001}
       UPLOAD_DIR: ./uploads
-      MAX_FILE_SIZE_MB: "5"
+      MAX_FILE_SIZE_MB: '5'
       # OSS 相关：不配置时上传存本地磁盘，配置后自动切到阿里云 OSS
       OSS_REGION: ${OSS_REGION:-}
       OSS_BUCKET: ${OSS_BUCKET:-}
@@ -119,7 +119,13 @@ services:
         condition: service_healthy
     healthcheck:
       # 健康检查：每 20 秒请求一次 /api/v1/health，连续失败 5 次判定不健康
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/v1/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:3000/api/v1/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
       interval: 20s
       timeout: 5s
       retries: 5
@@ -147,7 +153,13 @@ services:
       - api
     healthcheck:
       # 每 20 秒请求一次首页，失败 5 次判定不健康（部署脚本靠它等 web 就绪）
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 20s
       timeout: 5s
       retries: 5
@@ -160,11 +172,12 @@ services:
       # 80 = HTTP 入口，443 = HTTPS 入口（配好证书后启用）
       # ${NGINX_HTTP_PORT:-80}：默认 80；staging 在 .env.staging 里改成 8080，
       # 这样 staging 和 prod 的 nginx 才不会都去抢 80 端口
-      - "${NGINX_HTTP_PORT:-80}:80"
-      - "${NGINX_HTTPS_PORT:-443}:443"
+      - '${NGINX_HTTP_PORT:-80}:80'
+      - '${NGINX_HTTPS_PORT:-443}:443'
     volumes:
       # 把宿主机上的 nginx 配置文件挂进容器（:ro = 只读），改配置不用重建镜像
       - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./deploy/errors:/usr/share/nginx/html/errors:ro
       # 证书相关目录：certbot 申请到的证书放在命名卷里，nginx 读它
       - certbot-www:/var/www/certbot:ro
       - certbot-certs:/etc/letsencrypt:ro
@@ -175,7 +188,7 @@ services:
 
   certbot:
     image: certbot/certbot
-    profiles: ["certbot"]
+    profiles: ['certbot']
     volumes:
       - certbot-www:/var/www/certbot
       - certbot-certs:/etc/letsencrypt

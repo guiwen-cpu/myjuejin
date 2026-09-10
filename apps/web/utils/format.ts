@@ -14,8 +14,8 @@ export function formatDate(iso: string, locale: string): string {
   })
 }
 
-export function timeAgo(iso: string, locale: string): string {
-  const diff = Date.now() - new Date(iso).getTime()
+export function timeAgo(iso: string, locale: string, now = Date.now()): string {
+  const diff = now - new Date(iso).getTime()
   const minutes = Math.floor(diff / 60_000)
   if (minutes < 1) return locale === 'zh' ? '刚刚' : 'just now'
   if (minutes < 60) return locale === 'zh' ? `${minutes} 分钟前` : `${minutes}m ago`

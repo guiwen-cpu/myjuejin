@@ -31,6 +31,7 @@ export class SearchService implements OnModuleInit {
       await this.client.index('users').updateSettings({
         searchableAttributes: ['username', 'bio'],
       })
+      await this.reindexAll()
       this.logger.log('Meilisearch connected and indexes configured.')
     } catch (e) {
       this.logger.warn(`Meilisearch init failed: ${(e as Error).message}`)
@@ -74,29 +75,90 @@ export class SearchService implements OnModuleInit {
     if (!this.client) return
     const user = await this.prisma.user.findUnique({ where: { id: userId } })
     if (!user) return
-    await this.client.index('users').addDocuments([
-      { id: user.id, username: user.username, bio: user.bio ?? '' },
-    ])
+    await this.client
+      .index('users')
+      .addDocuments([{ id: user.id, username: user.username, bio: user.bio ?? '' }])
+  }
+
+  // 每次服务启动时把库里的存量文章/用户补进索引。
+  // 否则 seed 出的历史文章永远不会出现在搜索里（indexArticle 只在新发布时触发）。
+  // 文档以 id 为主键，重复添加会覆盖旧文档，因此可以放心全量重建。
+  async reindexAll(): Promise<void> {
+    if (!this.client) return
+    const articles = await this.prisma.article.findMany({
+      where: { status: 'published' },
+      select: {
+        id: true,
+        title: true,
+        summary: true,
+        publishedAt: true,
+        author: { select: { username: true } },
+        tags: { include: { tag: { select: { slug: true } } } },
+      },
+    })
+    const users = await this.prisma.user.findMany({
+      select: { id: true, username: true, bio: true },
+    })
+    if (articles.length > 0) {
+      await this.client.index('articles').addDocuments(
+        articles.map((a) => ({
+          id: a.id,
+          title: a.title,
+          summary: a.summary ?? '',
+          tagSlugs: a.tags.map((t) => t.tag.slug),
+          authorUsername: a.author.username,
+          status: 'published',
+          publishedAt: a.publishedAt?.getTime() ?? Date.now(),
+        })),
+      )
+    }
+    if (users.length > 0) {
+      await this.client
+        .index('users')
+        .addDocuments(users.map((u) => ({ id: u.id, username: u.username, bio: u.bio ?? '' })))
+    }
+    this.logger.log(`Meilisearch backfilled: ${articles.length} articles, ${users.length} users.`)
   }
 
   async searchArticles(q: string, limit = 20): Promise<{ ids: number[]; total: number }> {
     if (this.client) {
       try {
-        const result = await this.client.index('articles').search(q, { limit, filter: ['status = published'] })
+        const result = await this.client
+          .index('articles')
+          .search(q, { limit, filter: ['status = published'] })
         const ids = result.hits.map((h) => Number((h as { id: number }).id))
         return { ids, total: result.estimatedTotalHits ?? ids.length }
       } catch (e) {
         this.logger.warn(`Meilisearch search failed, fallback: ${(e as Error).message}`)
       }
     }
-    // 兜底：PostgreSQL LIKE
+    // 兜底：PostgreSQL 大小写不敏感 + 分词模糊匹配。
+    // 把关键词按空白拆成多个词，每个词都要在「标题/摘要/作者名/标签」任一字段中出现，
+    // 既保证大小写兼容（TypeScript / typescript 都能搜到），也支持多词部分匹配。
+    const words = q.trim().split(/\s+/).filter(Boolean)
+    const andGroups = words.map((word) => ({
+      OR: [
+        { title: { contains: word, mode: 'insensitive' as const } },
+        { summary: { contains: word, mode: 'insensitive' as const } },
+        { author: { username: { contains: word, mode: 'insensitive' as const } } },
+        {
+          tags: {
+            some: {
+              tag: {
+                OR: [
+                  { name: { contains: word, mode: 'insensitive' as const } },
+                  { slug: { contains: word, mode: 'insensitive' as const } },
+                ],
+              },
+            },
+          },
+        },
+      ],
+    }))
     const rows = await this.prisma.article.findMany({
       where: {
         status: 'published',
-        OR: [
-          { title: { contains: q } },
-          { summary: { contains: q } },
-        ],
+        AND: andGroups,
       },
       orderBy: { publishedAt: 'desc' },
       take: limit,
@@ -115,8 +177,15 @@ export class SearchService implements OnModuleInit {
         this.logger.warn(`Meilisearch user search failed, fallback: ${(e as Error).message}`)
       }
     }
+    const words = q.trim().split(/\s+/).filter(Boolean)
+    const andGroups = words.map((word) => ({
+      OR: [
+        { username: { contains: word, mode: 'insensitive' as const } },
+        { bio: { contains: word, mode: 'insensitive' as const } },
+      ],
+    }))
     const rows = await this.prisma.user.findMany({
-      where: { OR: [{ username: { contains: q } }, { bio: { contains: q } }] },
+      where: { AND: andGroups },
       take: limit,
       select: { id: true },
     })

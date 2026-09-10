@@ -11,6 +11,7 @@
     "logout": "退出登录",
     "settings": "个人设置",
     "profile": "个人主页",
+    "adminTags": "标签管理",
     "language": "语言",
     "zh": "中文",
     "en": "English"
@@ -18,8 +19,18 @@
   "home": {
     "feed": "推荐",
     "hot": "热门",
+    "all": "全部",
     "hotRank": "热门榜",
     "tagNav": "标签导航",
+    "recAuthors": "推荐作者",
+    "hotTags": "热门标签",
+    "posts": "篇文章",
+    "backTop": "回到顶部",
+    "cta": {
+      "title": "开始创作",
+      "desc": "记录你的技术思考，分享给每一位开发者",
+      "write": "写文章"
+    },
     "loadMore": "加载更多",
     "noMore": "没有更多了",
     "empty": "暂时没有内容，换个标签看看吧"
@@ -43,6 +54,7 @@
     "author": "作者",
     "publishTime": "发布于",
     "noComments": "还没有评论，快来抢沙发",
+    "viewCover": "查看封面大图",
     "deleteSuccess": "已删除"
   },
   "user": {
@@ -68,7 +80,8 @@
     "publish": "发布",
     "publishSuccess": "发布成功",
     "draftSuccess": "草稿已保存",
-    "editorTip": "支持 Markdown 语法"
+    "editorTip": "支持 Markdown 语法",
+    "cropImage": "裁剪图片"
   },
   "auth": {
     "username": "用户名",
@@ -93,6 +106,22 @@
     "empty": "没有找到相关内容",
     "result": "搜索结果"
   },
+  "admin": {
+    "subtitle": "维护站点标签，支持增删改查",
+    "new": "新建标签",
+    "name": "标签名称",
+    "slug": "标识（slug）",
+    "slugPlaceholder": "如 frontend，留空自动生成",
+    "articleCount": "文章数",
+    "actions": "操作",
+    "edit": "编辑",
+    "delete": "删除",
+    "createTitle": "新建标签",
+    "editTitle": "编辑标签",
+    "requireName": "请填写标签名称",
+    "empty": "还没有标签，点击右上角新建",
+    "confirmDelete": "确定删除标签“{name}”？删除后该标签会从相关文章中移除"
+  },
   "common": {
     "loading": "加载中…",
     "confirm": "确定",
@@ -103,7 +132,8 @@
     "error": "出错了",
     "retry": "重试",
     "back": "返回",
-    "all": "全部"
+    "all": "全部",
+    "close": "关闭"
   },
   "errors": {
     "UNAUTHORIZED": "请先登录",
@@ -118,7 +148,9 @@
     "UPLOAD_TOO_LARGE": "图片太大",
     "UNSUPPORTED_FILE_TYPE": "仅支持图片文件",
     "SEARCH_UNAVAILABLE": "搜索暂不可用",
-    "VALIDATION_FAILED": "提交内容有误，请检查"
+    "VALIDATION_FAILED": "提交内容有误，请检查",
+    "CONFLICT": "标签名称或标识已存在",
+    "TAG_NOT_FOUND": "标签不存在"
   },
   "footer": {
     "desc": "DevShare（技享）—— 开发者技术分享社区",

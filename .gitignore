@@ -17,6 +17,8 @@ uploads/
 .DS_Store
 .idea/
 .vscode/
+.agents/
+.claude/
 *.tsbuildinfo
 apps/web/.data/
 apps/api/prisma/dev.db

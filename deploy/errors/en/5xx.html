@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Service Temporarily Unavailable (5xx) · DevShare</title>
+  <style>
+    :root { --bg:#f7f8fa; --card:#fff; --text:#0f172a; --text-soft:#64748b; --brand:#2f6bff; --brand-dark:#1f4fe8; --border:#e2e8f0; --radius:20px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px; background:var(--bg); color:var(--text); font-family:"Inter","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; }
+    .card { width:100%; max-width:480px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:0 20px 45px -22px rgba(15,23,42,.22); padding:40px 32px 32px; text-align:center; }
+    .art { width:200px; height:auto; margin:0 auto 20px; display:block; }
+    .status { display:inline-block; font-size:13px; font-weight:700; letter-spacing:.04em; color:var(--brand); background:rgba(47,107,255,.10); border:1px solid rgba(47,107,255,.25); padding:4px 12px; border-radius:999px; margin-bottom:14px; }
+    .title { font-size:28px; font-weight:800; line-height:1.25; }
+    .desc { margin-top:12px; font-size:15px; line-height:1.7; color:var(--text-soft); }
+    .btn { display:inline-flex; align-items:center; gap:8px; margin-top:26px; padding:12px 22px; border-radius:12px; background:var(--brand); color:#fff; font-size:15px; font-weight:600; text-decoration:none; transition:background .18s ease, transform .12s ease; }
+    .btn:hover { background:var(--brand-dark); transform:translateY(-1px); }
+    .footer { margin-top:26px; font-size:13px; color:var(--text-soft); }
+    @media (max-width:480px) { .card { padding:32px 22px 26px; } .title { font-size:24px; } }
+    @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <svg class="art" viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Service issue">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eef4ff"/><stop offset="1" stop-color="#e6fbf8"/></linearGradient>
+        <linearGradient id="deck" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8eb6ff"/><stop offset="1" stop-color="#2f6bff"/></linearGradient>
+      </defs>
+      <circle cx="120" cy="104" r="92" fill="url(#bg)"/>
+      <g fill="#4cd9cd"><circle cx="70" cy="56" r="13"/><circle cx="92" cy="50" r="17"/><circle cx="114" cy="56" r="13"/><rect x="70" y="56" width="44" height="16" rx="8"/></g>
+      <rect x="56" y="80" width="128" height="86" rx="16" fill="url(#deck)"/>
+      <rect x="68" y="92" width="104" height="16" rx="8" fill="#ffffff" opacity="0.92"/>
+      <rect x="68" y="116" width="104" height="16" rx="8" fill="#ffffff" opacity="0.92"/>
+      <rect x="68" y="140" width="104" height="16" rx="8" fill="#ffffff" opacity="0.92"/>
+      <circle cx="80" cy="100" r="4" fill="#00c2a8"/><circle cx="80" cy="124" r="4" fill="#00c2a8"/><circle cx="80" cy="148" r="4" fill="#00c2a8"/>
+      <g transform="translate(168,60)"><path d="M0 30 L18 2 L36 30 Z" fill="#ffb020"/><rect x="16" y="12" width="4" height="10" rx="2" fill="#7a4a00"/><circle cx="18" cy="27" r="2.4" fill="#7a4a00"/></g>
+    </svg>
+    <span class="status">5xx</span>
+    <h1 class="title">Service Temporarily Unavailable</h1>
+    <p class="desc">We are working hard to restore service. Please try again shortly.</p>
+    <a class="btn" href="/en">Back to Home</a>
+    <p class="footer">DevShare · Developer Community</p>
+  </main>
+</body>
+</html>
