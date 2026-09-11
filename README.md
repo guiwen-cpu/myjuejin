@@ -4,13 +4,12 @@
 
 ## 技术栈
 
-
 | 层   | 选型                                                                                     |
 | ---- | ---------------------------------------------------------------------------------------- |
 | 前端 | Nuxt 4（Vue 3 + Vite + TS）、Tailwind CSS v4、vue-i18n、TanStack Query、TanStack Virtual |
 | 后端 | NestJS 11、Prisma ORM                                                                    |
 | 数据 | PostgreSQL 16（主库）、Redis 7（缓存/计数/刷新令牌）、Meilisearch（搜索）                |
-| 部署 | Docker Compose、Nginx、阿里云（ECS + OSS + CDN）、Let's Encrypt                          |
+| 部署 | Docker Compose、Nginx、阿里云（ECS + OSS + CDN + ACR）、Let's Encrypt                    |
 
 ## 目录结构
 
